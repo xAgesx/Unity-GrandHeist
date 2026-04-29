@@ -1,4 +1,6 @@
+
 using UnityEngine;
+using UnityEngine.UI;
 
 [RequireComponent(typeof(CharacterController))]
 public class PlayerController : MonoBehaviour
@@ -10,15 +12,19 @@ public class PlayerController : MonoBehaviour
     public float gravity     = -15f;
 
     [Header("Crouch")]
-    public float standHeight  = 1.8f;
-    public float crouchHeight = 0.9f;
+    public float standHeight           = 1.8f;
+    public float crouchHeight          = 0.9f;
     public float crouchTransitionSpeed = 8f;
 
-    [Header("Noise")]
-    public float walkNoiseRadius   = 6f;
-    public float runNoiseRadius    = 14f;
-    public float crouchNoiseRadius = 0f;   
+    [Header("Noise — fill per second at point-blank")]
+    public float walkNoiseFill   = 0.6f;
+    public float runNoiseFill    = 2.5f;
+    public float walkNoiseRadius = 7f;
+    public float runNoiseRadius  = 16f;
     public LayerMask guardLayer;
+
+    [Header("UI")]
+    public Text playerStatusText;
 
     public enum MoveState { Idle, Walk, Run, Crouch }
     public MoveState State { get; private set; } = MoveState.Idle;
@@ -28,38 +34,34 @@ public class PlayerController : MonoBehaviour
     CharacterController _cc;
     Transform           _cam;
     float               _yVel;
-    float               _targetCCHeight;
 
     void Awake()
     {
         _cc  = GetComponent<CharacterController>();
         _cam = Camera.main?.transform;
-
         _cc.height = standHeight;
-        _targetCCHeight = standHeight;
+        _cc.center = new Vector3(0f, standHeight * 0.5f, 0f);
     }
 
     void Update()
     {
         HandleMovement();
         SmoothCrouch();
+        UpdateUI();
     }
-
 
     void HandleMovement()
     {
         bool wantRun    = Input.GetKey(KeyCode.LeftShift);
         bool wantCrouch = Input.GetKey(KeyCode.LeftControl);
+        Vector2 input   = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        bool moving     = input.sqrMagnitude > 0.01f;
 
-        Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        bool moving = input.sqrMagnitude > 0.01f;
+        if (wantCrouch)   State = MoveState.Crouch;
+        else if (!moving) State = MoveState.Idle;
+        else if (wantRun) State = MoveState.Run;
+        else              State = MoveState.Walk;
 
-        if (wantCrouch)               State = MoveState.Crouch;
-        else if (!moving)             State = MoveState.Idle;
-        else if (wantRun)             State = MoveState.Run;
-        else                          State = MoveState.Walk;
-
-        // Speed
         float speed = State switch
         {
             MoveState.Crouch => crouchSpeed,
@@ -68,61 +70,69 @@ public class PlayerController : MonoBehaviour
             _                => 0f
         };
 
-        Vector3 camForward = _cam != null ? Vector3.ProjectOnPlane(_cam.forward, Vector3.up).normalized
-                                          : transform.forward;
-        Vector3 camRight   = _cam != null ? Vector3.ProjectOnPlane(_cam.right,   Vector3.up).normalized
-                                          : transform.right;
-        Vector3 moveDir    = (camForward * input.y + camRight * input.x).normalized;
+        Vector3 fwd  = _cam ? Vector3.ProjectOnPlane(_cam.forward, Vector3.up).normalized : transform.forward;
+        Vector3 rgt  = _cam ? Vector3.ProjectOnPlane(_cam.right,   Vector3.up).normalized : transform.right;
+        Vector3 dir  = (fwd * input.y + rgt * input.x).normalized;
 
         if (_cc.isGrounded && _yVel < 0f) _yVel = -2f;
         _yVel += gravity * Time.deltaTime;
+        _cc.Move((dir * speed + Vector3.up * _yVel) * Time.deltaTime);
 
-        Vector3 velocity = moveDir * speed + Vector3.up * _yVel;
-        _cc.Move(velocity * Time.deltaTime);
-
-        if (moveDir.sqrMagnitude > 0.01f)
-            transform.rotation = Quaternion.Slerp(transform.rotation,
-                                                   Quaternion.LookRotation(moveDir),
-                                                   12f * Time.deltaTime);
+        if (dir.sqrMagnitude > 0.01f)
+            transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(dir), 12f * Time.deltaTime);
 
         if (moving)
         {
-            float noiseR = State switch
+            switch (State)
             {
-                MoveState.Run    => runNoiseRadius,
-                MoveState.Walk   => walkNoiseRadius,
-                MoveState.Crouch => crouchNoiseRadius,
-                _                => 0f
-            };
-            if (noiseR > 0f) EmitNoise(noiseR);
+                case MoveState.Run:  EmitNoise(runNoiseRadius,  runNoiseFill);  break;
+                case MoveState.Walk: EmitNoise(walkNoiseRadius, walkNoiseFill); break;
+            }
         }
     }
 
     void SmoothCrouch()
     {
-        _targetCCHeight = IsCrouching ? crouchHeight : standHeight;
-        if (Mathf.Abs(_cc.height - _targetCCHeight) > 0.01f)
+        float target = IsCrouching ? crouchHeight : standHeight;
+        if (Mathf.Abs(_cc.height - target) > 0.01f)
         {
-            _cc.height = Mathf.Lerp(_cc.height, _targetCCHeight, crouchTransitionSpeed * Time.deltaTime);
-            // Keep feet on ground when crouching
-            _cc.center = new Vector3(0f, _cc.height * 0.5f, 0f);
+            float prev   = _cc.height;
+            _cc.height   = Mathf.Lerp(_cc.height, target, crouchTransitionSpeed * Time.deltaTime);
+            _cc.center   = new Vector3(0f, _cc.height * 0.5f, 0f);
+            transform.position += new Vector3(0f, (_cc.height - prev) * 0.5f, 0f);
         }
     }
 
-    void EmitNoise(float radius)
+    void EmitNoise(float radius, float fillPerSecond)
     {
-        Collider[] guards = Physics.OverlapSphere(transform.position, radius, guardLayer);
-        foreach (var g in guards)
-            g.GetComponent<GuardBrain>()?.OnHearNoise(transform.position);
+        Collider[] hits = Physics.OverlapSphere(transform.position, radius, guardLayer);
+        foreach (var h in hits)
+        {
+            var brain = h.GetComponent<GuardBrain>();
+            if (brain == null) continue;
+            
+            float dist = Vector3.Distance(transform.position, h.transform.position);
+            
+            // Exponential falloff makes guards hyper-sensitive close up, but allows walking further away
+            float falloff = Mathf.Pow(1f - Mathf.Clamp01(dist / radius), 3f);
+            
+            brain.OnHearNoise(transform.position, fillPerSecond * falloff * Time.deltaTime);
+        }
     }
 
+    void UpdateUI()
+    {
+        if (playerStatusText != null)
+        {
+            playerStatusText.text = $"State: {State}\nKeycards: {Keycards}\nNoise: {(State == MoveState.Idle || State == MoveState.Crouch ? "Silent" : "Emitting")}";
+        }
+    }
 
     void OnTriggerEnter(Collider other)
     {
         if (other.CompareTag("Keycard"))
         {
             Keycards++;
-            Debug.Log($"Keycard collected! Total: {Keycards}");
             Destroy(other.gameObject);
         }
     }

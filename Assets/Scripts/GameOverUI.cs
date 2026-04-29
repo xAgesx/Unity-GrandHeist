@@ -2,31 +2,13 @@ using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
 
-/// <summary>
-/// Handles the Game Over screen.
-///
-/// Setup:
-///   - Create a Canvas (Screen Space Overlay).
-///   - Add a full-screen black Image as background (name it "Background").
-///   - Add a Text or TextMeshPro component for the message.
-///   - Add a Text or TextMeshPro component for the restart hint.
-///   - Attach this script to the Canvas.
-///   - Assign the references in the Inspector.
-///   - The Canvas starts disabled — this script enables it on game over.
-///
-/// If you have TextMeshPro installed, swap Text for TMP_Text and
-/// uncomment the TMPro using directive below.
-/// </summary>
-
-// using TMPro;
-
 public class GameOverUI : MonoBehaviour
 {
     public static GameOverUI Instance { get; private set; }
 
     [Header("UI References")]
-    public GameObject panel;          // the root panel to show/hide
-    public Text       messageText;    // swap for TMP_Text if using TextMeshPro
+    public GameObject panel;
+    public Text       messageText;
     public Text       hintText;
 
     [Header("Message")]
@@ -70,8 +52,6 @@ public class GameOverUI : MonoBehaviour
 
         StartCoroutine(FadeIn());
 
-        // Optionally freeze time after fade
-        // Time.timeScale = 0f;
     }
 
     System.Collections.IEnumerator FadeIn()

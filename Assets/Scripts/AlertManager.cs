@@ -12,12 +12,8 @@ public class AlertManager : MonoBehaviour
 
     public void TriggerAlarm(Vector3 lastKnownPlayerPosition)
     {
-        Debug.Log("GLOBAL ALARM TRIGGERED!");
-        
-        GuardBrain[] allGuards = FindObjectsOfType<GuardBrain>();
-        foreach (GuardBrain guard in allGuards)
-        {
+        GuardBrain[] allGuards = FindObjectsByType<GuardBrain>(FindObjectsSortMode.None);
+        foreach (var guard in allGuards)
             guard.OnGlobalAlarm(lastKnownPlayerPosition);
-        }
     }
 }

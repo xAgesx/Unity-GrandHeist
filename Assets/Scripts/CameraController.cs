@@ -1,14 +1,5 @@
 using UnityEngine;
 
-/// <summary>
-/// Third-person orbit camera.
-/// Attach to the Camera itself. Assign "target" to the player root.
-///
-/// Controls:
-///   RMB (hold) → look around
-///   Scroll     → zoom in / out
-///   Follows player smoothly; clips against geometry.
-/// </summary>
 public class CameraController : MonoBehaviour
 {
     [Header("Target")]
@@ -43,7 +34,6 @@ public class CameraController : MonoBehaviour
 
     PlayerController _playerCtrl;
 
-
     void Awake()
     {
         if (target == null)
@@ -70,7 +60,6 @@ public class CameraController : MonoBehaviour
         CalculatePosition();
     }
 
-
     void HandleInput()
     {
         if (Input.GetMouseButton(1))
@@ -79,8 +68,6 @@ public class CameraController : MonoBehaviour
             _pitch -= Input.GetAxisRaw("Mouse Y") * mouseSensitivity;
             _pitch  = Mathf.Clamp(_pitch, minPitch, maxPitch);
         }
-
-        // Zoom
         float scroll = Input.GetAxisRaw("Mouse ScrollWheel");
         if (Mathf.Abs(scroll) > 0.001f)
             _wantedDistance = Mathf.Clamp(_wantedDistance - scroll * zoomSpeed, minDistance, maxDistance);
@@ -94,7 +81,7 @@ public class CameraController : MonoBehaviour
         Vector3 pivot = target.position + pivotOffset;
 
         Quaternion desiredRot = Quaternion.Euler(_pitch, _yaw, 0f);
-        Vector3    desiredDir = desiredRot * Vector3.back;   // behind the player
+        Vector3    desiredDir = desiredRot * Vector3.back;
 
         float colDist = _wantedDistance;
         if (Physics.SphereCast(pivot, collisionRadius, desiredDir, out RaycastHit hit,
