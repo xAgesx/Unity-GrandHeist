@@ -115,7 +115,7 @@ public class GuardBrain : MonoBehaviour {
         currentState = s;
         stateTimer = 0f;
         if (notif) notif.text = "";
-        
+
         if (agent.isOnNavMesh) agent.ResetPath();
         if (agent.isStopped) agent.isStopped = false;
 
@@ -161,10 +161,10 @@ public class GuardBrain : MonoBehaviour {
 
     bool CheckSight() {
         if (player == null) return false;
-        
+
         Vector3 toPlayerFlat = new Vector3(player.position.x - transform.position.x, 0f, player.position.z - transform.position.z);
         float dist = toPlayerFlat.magnitude;
-        
+
         bool crouch = playerCtrl != null && playerCtrl.IsCrouching;
         float maxDist = sightDistance * (crouch ? crouchSightMod : 1f);
 
@@ -176,7 +176,7 @@ public class GuardBrain : MonoBehaviour {
 
         Vector3 origin = transform.position + Vector3.up * 1.5f;
         Vector3 target = player.position + Vector3.up * (crouch ? 0.6f : 1.2f);
-        
+
         return !Physics.Linecast(origin, target, obstacleLayers, QueryTriggerInteraction.Ignore);
     }
 
@@ -212,7 +212,7 @@ public class GuardBrain : MonoBehaviour {
 
     NodeStatus TickChase() {
         if (!canSeePlayer) {
-            SetState(GuardState.ChaseSound); 
+            SetState(GuardState.ChaseSound);
             return NodeStatus.Success;
         }
 
@@ -241,21 +241,21 @@ public class GuardBrain : MonoBehaviour {
 
         stateTimer += Time.deltaTime;
         if (notif) notif.text = "?";
-        
-        if (stateTimer >= searchDuration) { 
-            SetState(GuardState.Patrol); 
-            return NodeStatus.Success; 
+
+        if (stateTimer >= searchDuration) {
+            SetState(GuardState.Patrol);
+            return NodeStatus.Success;
         }
 
         if (searchPoints == null || searchPointIndex >= searchPoints.Length) {
-            SetState(GuardState.Patrol); 
+            SetState(GuardState.Patrol);
             return NodeStatus.Success;
         }
 
         if (HasReachedPathTarget()) {
             searchPointTimer += Time.deltaTime;
-            if (searchPointTimer >= searchWaitTime) { 
-                searchPointTimer = 0f; 
+            if (searchPointTimer >= searchWaitTime) {
+                searchPointTimer = 0f;
                 searchPointIndex++;
                 if (searchPointIndex < searchPoints.Length)
                     agent.SetDestination(searchPoints[searchPointIndex]);
@@ -270,9 +270,9 @@ public class GuardBrain : MonoBehaviour {
 
         if (notif) notif.text = "?";
         stateTimer += Time.deltaTime;
-        
+
         if (HasReachedPathTarget() || stateTimer > 4f) {
-            SetState(GuardState.Search); 
+            SetState(GuardState.Search);
             return NodeStatus.Success;
         }
 
@@ -295,9 +295,9 @@ public class GuardBrain : MonoBehaviour {
         } else {
             if (HasReachedPathTarget()) {
                 wanderTimer += Time.deltaTime;
-                if (wanderTimer >= wanderWaitTime) { 
-                    wanderTimer = 0f; 
-                    hasWanderTarget = false; 
+                if (wanderTimer >= wanderWaitTime) {
+                    wanderTimer = 0f;
+                    hasWanderTarget = false;
                 }
             }
             if (!hasWanderTarget) PickWanderTarget();
@@ -326,9 +326,13 @@ public class GuardBrain : MonoBehaviour {
     }
 
     void CatchPlayer() {
-        if (notif) notif.text = "CAUGHT";
-        if (GameOverUI.Instance == null) Debug.LogError("GameOverUI is missing from the scene!");
-        GameOverUI.Instance?.ShowGameOver();
+        if (notif != null) {
+            notif.text = "CAUGHT";
+        }
+
+        if (GameManager.Instance != null) {
+            GameManager.Instance.TriggerGameOver();
+        }
     }
 
     void SetupFlashlight() {

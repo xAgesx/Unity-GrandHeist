@@ -121,12 +121,22 @@ public class PlayerController : MonoBehaviour
     }
 
     void UpdateUI()
+{
+    if (UIManager.Instance != null)
     {
-        if (playerStatusText != null)
+        string noiseMsg;
+        if (State == MoveState.Idle || State == MoveState.Crouch)
         {
-            playerStatusText.text = $"State: {State}\nKeycards: {Keycards}\nNoise: {(State == MoveState.Idle || State == MoveState.Crouch ? "Silent" : "Emitting")}";
+            noiseMsg = "Silent";
         }
+        else
+        {
+            noiseMsg = "Emitting";
+        }
+
+        UIManager.Instance.UpdateHUD(State.ToString(), Keycards, noiseMsg);
     }
+}
 
     void OnTriggerEnter(Collider other)
     {

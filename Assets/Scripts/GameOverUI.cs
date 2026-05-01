@@ -33,11 +33,11 @@ public class GameOverUI : MonoBehaviour
         panel.SetActive(false);
     }
 
-    void Update()
-    {
-        if (isShowing && Input.GetKeyDown(KeyCode.R))
-            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
-    }
+    // void Update()
+    // {
+    //     if (isShowing && Input.GetKeyDown(KeyCode.R))
+    //         SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
+    // }
 
     public void ShowGameOver()
     {

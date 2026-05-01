@@ -1,7 +1,6 @@
 using UnityEngine;
 
-public class SecurityCamera : MonoBehaviour
-{
+public class SecurityCamera : MonoBehaviour {
     public enum Axis { X, Y, Z }
 
     [Header("Sweep Settings")]
@@ -11,48 +10,42 @@ public class SecurityCamera : MonoBehaviour
     public float returnToSweepSpeed = 2f;
 
     [Header("Detection (Tied to Spotlight)")]
-    public Light childSpotlight; 
+    public Light childSpotlight;
     public LayerMask obstacleLayers;
     public float lockOnSpeed = 5f;
-    public float raycastStartOffset = 0.5f; // Starts the check slightly in front of lens
+    public float raycastStartOffset = 0.5f;
 
     [Header("Game Rules")]
-    public float timeToLose = 0.5f; 
+    public float timeToLose = 0.5f;
 
     [Header("Visuals")]
-    public Color colorIdle = Color.green; 
+    public Color colorIdle = Color.green;
     public Color colorAlert = Color.red;
     public Renderer cameraRenderer;
     public int emissionMaterialIndex = 0;
 
     public float detectionMeter;
-    
+
     private Quaternion initialLocalRotation;
     private Transform player;
-    private bool isGameOver;
+    private bool cameraIsGameOver;
     private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
-    public float Offset = .5f;
 
-    void Start()
-    {
+    void Start() {
         initialLocalRotation = transform.localRotation;
-        
+
         GameObject go = GameObject.FindWithTag("Player");
-        if (go != null)
-        {
+        if (go != null) {
             player = go.transform;
         }
 
-        if (childSpotlight != null)
-        {
+        if (childSpotlight != null) {
             childSpotlight.color = colorIdle;
         }
     }
 
-    void Update()
-    {
-        if (isGameOver)
-        {
+    void Update() {
+        if (cameraIsGameOver) {
             return;
         }
 
@@ -63,112 +56,81 @@ public class SecurityCamera : MonoBehaviour
         UpdateVisuals(canSee);
     }
 
-    bool CheckSight()
-    {
-        if (player == null || childSpotlight == null)
-        {
+    bool CheckSight() {
+        if (player == null || childSpotlight == null) {
             return false;
         }
 
-        // We check 3 points to cover the player's entire height
-        // This removes the blind spot for players close to the camera
+        // Check Feet, Waist, and Head to fix blind spots
         Vector3 feet = player.position;
         Vector3 waist = player.position + Vector3.up * 0.9f;
         Vector3 head = player.position + Vector3.up * 1.8f;
 
-        if (IsPointInLightCone(feet) || IsPointInLightCone(waist) || IsPointInLightCone(head))
-        {
+        if (IsPointInLightCone(feet) || IsPointInLightCone(waist) || IsPointInLightCone(head)) {
             return true;
         }
 
         return false;
     }
 
-    bool IsPointInLightCone(Vector3 targetPoint)
-    {
-        // Calculate vector from camera to the target part of player
+    bool IsPointInLightCone(Vector3 targetPoint) {
         Vector3 toTarget = targetPoint - transform.position;
         float dist = toTarget.magnitude;
 
-        // 1. Distance check
-        if (dist > childSpotlight.range)
-        {
+        if (dist > childSpotlight.range) {
             return false;
         }
 
-        // 2. Cone Angle check
         float angle = Vector3.Angle(transform.forward, toTarget);
-        if (angle > (childSpotlight.spotAngle * Offset))
-        {
+        if (angle > (childSpotlight.spotAngle * 0.5f)) {
             return false;
         }
 
-        // 3. Obstacle check (with offset to prevent hitting the camera itself)
-        // We start the linecast slightly forward from the camera center
         Vector3 rayStart = transform.position + (transform.forward * raycastStartOffset);
-        
-        if (Physics.Linecast(rayStart, targetPoint, obstacleLayers, QueryTriggerInteraction.Ignore))
-        {
+        if (Physics.Linecast(rayStart, targetPoint, obstacleLayers, QueryTriggerInteraction.Ignore)) {
             return false;
         }
 
         return true;
     }
 
-    void HandleDetectionLogic(bool canSee)
-    {
-        if (canSee)
-        {
+    void HandleDetectionLogic(bool canSee) {
+        if (canSee) {
             detectionMeter = detectionMeter + Time.deltaTime;
 
-            if (AlertManager.Instance != null)
-            {
+            if (AlertManager.Instance != null) {
                 AlertManager.Instance.TriggerAlarm(player.position);
             }
 
-            if (detectionMeter >= timeToLose)
-            {
+            if (detectionMeter >= timeToLose) {
                 TriggerLose();
             }
-        }
-        else
-        {
+        } else {
             detectionMeter = detectionMeter - Time.deltaTime;
-            if (detectionMeter < 0)
-            {
-                detectionMeter = 0;
-            }
+            if (detectionMeter < 0) { detectionMeter = 0; }
         }
     }
 
-    void TriggerLose()
-    {
-        isGameOver = true;
-        if (GameOverUI.Instance != null)
-        {
-            GameOverUI.Instance.ShowGameOver();
+    void TriggerLose() {
+        cameraIsGameOver = true;
+        if (GameManager.Instance != null) {
+            GameManager.Instance.TriggerGameOver();
         }
     }
 
-    void HandleRotation(bool canSee)
-    {
-        if (canSee)
-        {
+    void HandleRotation(bool canSee) {
+        if (canSee) {
             Vector3 targetDir = (player.position + Vector3.up * 1.0f) - transform.position;
-            if (targetDir != Vector3.zero)
-            {
+            if (targetDir != Vector3.zero) {
                 Quaternion targetRot = Quaternion.LookRotation(targetDir);
                 transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, lockOnSpeed * Time.deltaTime);
             }
-        }
-        else
-        {
+        } else {
             float phase = Mathf.Sin(Time.time * sweepSpeed * Mathf.PI);
             float currentAngle = phase * (sweepAngle * 0.5f);
 
             Vector3 euler = Vector3.zero;
-            switch (sweepAxis)
-            {
+            switch (sweepAxis) {
                 case Axis.X: euler = new Vector3(currentAngle, 0, 0); break;
                 case Axis.Y: euler = new Vector3(0, currentAngle, 0); break;
                 case Axis.Z: euler = new Vector3(0, 0, currentAngle); break;
@@ -179,25 +141,15 @@ public class SecurityCamera : MonoBehaviour
         }
     }
 
-    void UpdateVisuals(bool canSee)
-    {
+    void UpdateVisuals(bool canSee) {
         Color targetColor;
-        if (canSee)
-        {
-            targetColor = colorAlert;
-        }
-        else
-        {
-            targetColor = colorIdle;
-        }
+        if (canSee) { targetColor = colorAlert; } else { targetColor = colorIdle; }
 
-        if (childSpotlight != null)
-        {
+        if (childSpotlight != null) {
             childSpotlight.color = Color.Lerp(childSpotlight.color, targetColor, 10f * Time.deltaTime);
         }
 
-        if (cameraRenderer != null)
-        {
+        if (cameraRenderer != null) {
             cameraRenderer.materials[emissionMaterialIndex].SetColor(EmissionColor, targetColor);
         }
     }
