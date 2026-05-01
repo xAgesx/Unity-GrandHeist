@@ -2,147 +2,203 @@ using UnityEngine;
 
 public class SecurityCamera : MonoBehaviour
 {
-    [Header("Sweep")]
-    public float sweepAngle = 60f;
-    public float sweepSpeed = 1f;
-    public Axis  sweepAxis  = Axis.Y;
     public enum Axis { X, Y, Z }
 
-    [Header("Detection")]
-    public float viewDistance = 15f;
-    public float viewAngle    = 50f;
-    public LayerMask playerLayer;
+    [Header("Sweep Settings")]
+    public float sweepAngle = 60f;
+    public float sweepSpeed = 1f;
+    public Axis sweepAxis = Axis.Y;
+    public float returnToSweepSpeed = 2f;
+
+    [Header("Detection (Tied to Spotlight)")]
+    public Light childSpotlight; 
     public LayerMask obstacleLayers;
-    public float crouchDetectionMultiplier = 0.4f;
+    public float lockOnSpeed = 5f;
+    public float raycastStartOffset = 0.5f; // Starts the check slightly in front of lens
 
-    [Header("Alert Meter")]
-    public float detectionTime = 1.5f;
-    public float cooldownTime  = 3f;
+    [Header("Game Rules")]
+    public float timeToLose = 0.5f; 
 
-    [Header("Spotlight")]
-    public Light spotlight;
-    public float spotIntensity      = 3f;
-    public Color spotPatrolColor    = new Color(1f, 0.95f, 0.8f);
-    public Color spotSuspiciousColor = Color.yellow;
-    public Color spotAlertColor     = Color.red;
-
-    [Header("Visual (optional)")]
+    [Header("Visuals")]
+    public Color colorIdle = Color.green; 
+    public Color colorAlert = Color.red;
     public Renderer cameraRenderer;
-    public int      emissionMaterialIndex = 0;
-    public Color    colorIdle       = Color.green;
-    public Color    colorSuspicious = Color.yellow;
-    public Color    colorAlert      = Color.red;
+    public int emissionMaterialIndex = 0;
 
-    public float DetectionMeter { get; private set; }
-
-    Quaternion       _baseRotation;
-    bool             _alarmFired;
-    Transform        _player;
-    PlayerController _playerCtrl;
-
-    static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+    public float detectionMeter;
+    
+    private Quaternion initialLocalRotation;
+    private Transform player;
+    private bool isGameOver;
+    private static readonly int EmissionColor = Shader.PropertyToID("_EmissionColor");
+    public float Offset = .5f;
 
     void Start()
     {
-        _baseRotation = transform.localRotation;
-        var go = GameObject.FindWithTag("Player");
-        if (go != null) { _player = go.transform; _playerCtrl = go.GetComponent<PlayerController>(); }
+        initialLocalRotation = transform.localRotation;
+        
+        GameObject go = GameObject.FindWithTag("Player");
+        if (go != null)
+        {
+            player = go.transform;
+        }
 
-        SetupSpotlight();
-        SetEmission(colorIdle);
+        if (childSpotlight != null)
+        {
+            childSpotlight.color = colorIdle;
+        }
     }
 
     void Update()
     {
-        Sweep();
-        Detect();
-        UpdateSpotlight();
-    }
-
-    void SetupSpotlight()
-    {
-        if (!spotlight) return;
-        spotlight.type      = LightType.Spot;
-        spotlight.spotAngle = viewAngle;
-        spotlight.range     = viewDistance;
-        spotlight.intensity = spotIntensity;
-        spotlight.color     = spotPatrolColor;
-        spotlight.shadows   = LightShadows.None;
-    }
-
-    void UpdateSpotlight()
-    {
-        if (!spotlight) return;
-        float t = Mathf.Clamp01(DetectionMeter / detectionTime);
-        spotlight.color     = Color.Lerp(spotPatrolColor, spotAlertColor, t * t);
-        spotlight.spotAngle = viewAngle;
-        spotlight.range     = viewDistance;
-    }
-
-    void Sweep()
-    {
-        float angle = Mathf.Sin(Time.time * sweepSpeed * Mathf.PI) * (sweepAngle * 0.5f);
-        Vector3 euler = sweepAxis switch
+        if (isGameOver)
         {
-            Axis.X => new Vector3(angle, 0, 0),
-            Axis.Z => new Vector3(0, 0, angle),
-            _      => new Vector3(0, angle, 0),
-        };
-        transform.localRotation = _baseRotation * Quaternion.Euler(euler);
+            return;
+        }
+
+        bool canSee = CheckSight();
+
+        HandleDetectionLogic(canSee);
+        HandleRotation(canSee);
+        UpdateVisuals(canSee);
     }
 
-    void Detect()
+    bool CheckSight()
     {
-        bool canSee = CanSeePlayer();
+        if (player == null || childSpotlight == null)
+        {
+            return false;
+        }
 
+        // We check 3 points to cover the player's entire height
+        // This removes the blind spot for players close to the camera
+        Vector3 feet = player.position;
+        Vector3 waist = player.position + Vector3.up * 0.9f;
+        Vector3 head = player.position + Vector3.up * 1.8f;
+
+        if (IsPointInLightCone(feet) || IsPointInLightCone(waist) || IsPointInLightCone(head))
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    bool IsPointInLightCone(Vector3 targetPoint)
+    {
+        // Calculate vector from camera to the target part of player
+        Vector3 toTarget = targetPoint - transform.position;
+        float dist = toTarget.magnitude;
+
+        // 1. Distance check
+        if (dist > childSpotlight.range)
+        {
+            return false;
+        }
+
+        // 2. Cone Angle check
+        float angle = Vector3.Angle(transform.forward, toTarget);
+        if (angle > (childSpotlight.spotAngle * Offset))
+        {
+            return false;
+        }
+
+        // 3. Obstacle check (with offset to prevent hitting the camera itself)
+        // We start the linecast slightly forward from the camera center
+        Vector3 rayStart = transform.position + (transform.forward * raycastStartOffset);
+        
+        if (Physics.Linecast(rayStart, targetPoint, obstacleLayers, QueryTriggerInteraction.Ignore))
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    void HandleDetectionLogic(bool canSee)
+    {
         if (canSee)
         {
-            DetectionMeter += Time.deltaTime;
-            float t = Mathf.Clamp01(DetectionMeter / detectionTime);
-            SetEmission(Color.Lerp(colorSuspicious, colorAlert, t));
+            detectionMeter = detectionMeter + Time.deltaTime;
 
-            if (!_alarmFired && DetectionMeter >= detectionTime)
+            if (AlertManager.Instance != null)
             {
-                _alarmFired = true;
-                AlertManager.Instance?.TriggerAlarm(_player.position);
+                AlertManager.Instance.TriggerAlarm(player.position);
+            }
+
+            if (detectionMeter >= timeToLose)
+            {
+                TriggerLose();
             }
         }
         else
         {
-            DetectionMeter -= Time.deltaTime * (detectionTime / cooldownTime);
-            DetectionMeter  = Mathf.Max(0f, DetectionMeter);
-            _alarmFired     = DetectionMeter > 0f && _alarmFired;
-            SetEmission(DetectionMeter > 0f
-                ? Color.Lerp(colorIdle, colorSuspicious, DetectionMeter / detectionTime)
-                : colorIdle);
+            detectionMeter = detectionMeter - Time.deltaTime;
+            if (detectionMeter < 0)
+            {
+                detectionMeter = 0;
+            }
         }
     }
 
-    bool CanSeePlayer()
+    void TriggerLose()
     {
-        if (_player == null) return false;
-        bool crouching = _playerCtrl != null && _playerCtrl.IsCrouching;
-        float maxDist  = viewDistance * (crouching ? crouchDetectionMultiplier : 1f);
-        Vector3 toPlayer = _player.position - transform.position;
-        if (toPlayer.magnitude > maxDist) return false;
-        if (Vector3.Angle(transform.forward, toPlayer) > viewAngle * 0.5f) return false;
-        Vector3 eyePos = _player.position + Vector3.up * (crouching ? 0.6f : 1.5f);
-        return !Physics.Linecast(transform.position, eyePos, obstacleLayers, QueryTriggerInteraction.Ignore);
+        isGameOver = true;
+        if (GameOverUI.Instance != null)
+        {
+            GameOverUI.Instance.ShowGameOver();
+        }
     }
 
-    void SetEmission(Color color)
+    void HandleRotation(bool canSee)
     {
-        if (!cameraRenderer) return;
-        cameraRenderer.materials[emissionMaterialIndex].SetColor(EmissionColor, color);
+        if (canSee)
+        {
+            Vector3 targetDir = (player.position + Vector3.up * 1.0f) - transform.position;
+            if (targetDir != Vector3.zero)
+            {
+                Quaternion targetRot = Quaternion.LookRotation(targetDir);
+                transform.rotation = Quaternion.Slerp(transform.rotation, targetRot, lockOnSpeed * Time.deltaTime);
+            }
+        }
+        else
+        {
+            float phase = Mathf.Sin(Time.time * sweepSpeed * Mathf.PI);
+            float currentAngle = phase * (sweepAngle * 0.5f);
+
+            Vector3 euler = Vector3.zero;
+            switch (sweepAxis)
+            {
+                case Axis.X: euler = new Vector3(currentAngle, 0, 0); break;
+                case Axis.Y: euler = new Vector3(0, currentAngle, 0); break;
+                case Axis.Z: euler = new Vector3(0, 0, currentAngle); break;
+            }
+
+            Quaternion sweepRot = initialLocalRotation * Quaternion.Euler(euler);
+            transform.localRotation = Quaternion.Slerp(transform.localRotation, sweepRot, returnToSweepSpeed * Time.deltaTime);
+        }
     }
 
-    void OnDrawGizmosSelected()
+    void UpdateVisuals(bool canSee)
     {
-        Gizmos.color = colorIdle * 0.6f;
-        float half = viewAngle * 0.5f;
-        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler( half, 0, 0) * transform.forward * viewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(-half, 0, 0) * transform.forward * viewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(0,  half, 0) * transform.forward * viewDistance);
-        Gizmos.DrawLine(transform.position, transform.position + Quaternion.Euler(0, -half, 0) * transform.forward * viewDistance);
+        Color targetColor;
+        if (canSee)
+        {
+            targetColor = colorAlert;
+        }
+        else
+        {
+            targetColor = colorIdle;
+        }
+
+        if (childSpotlight != null)
+        {
+            childSpotlight.color = Color.Lerp(childSpotlight.color, targetColor, 10f * Time.deltaTime);
+        }
+
+        if (cameraRenderer != null)
+        {
+            cameraRenderer.materials[emissionMaterialIndex].SetColor(EmissionColor, targetColor);
+        }
     }
 }
