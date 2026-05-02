@@ -1,4 +1,5 @@
 
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -34,6 +35,7 @@ public class PlayerController : MonoBehaviour
     CharacterController _cc;
     Transform           _cam;
     float               _yVel;
+    public HashSet<KeycardColor> Inventory = new HashSet<KeycardColor>();
 
     void Awake()
     {
@@ -48,6 +50,18 @@ public class PlayerController : MonoBehaviour
         HandleMovement();
         SmoothCrouch();
         UpdateUI();
+    }
+     public void AddKeycard(KeycardColor color)
+    {
+        Inventory.Add(color);
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.UpdateKeycards(
+                Inventory.Contains(KeycardColor.Green),
+                Inventory.Contains(KeycardColor.Blue),
+                Inventory.Contains(KeycardColor.Red)
+            );
+        }
     }
 
     void HandleMovement()
