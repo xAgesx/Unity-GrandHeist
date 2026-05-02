@@ -46598,7 +46598,10 @@ MonoBehaviour:
   guardLayer:
     serializedVersion: 2
     m_Bits: 128
-  playerStatusText: {fileID: 0}
+  maxStamina: 25
+  staminaDepleteRate: 25
+  staminaRegenRate: 2
+  currentStamina: 0
 --- !u!136 &1540609962
 CapsuleCollider:
   m_ObjectHideFlags: 0
