@@ -60,9 +60,9 @@ public class PlayerController : MonoBehaviour {
     }
 
     void HandleMovement() {
-        Debug.Log(prevStamina + " " + currentStamina);
-        enableRun = (prevStamina > currentStamina || currentStamina > 10);
         
+        enableRun = (prevStamina > currentStamina || currentStamina > 10);
+
 
         bool canRun = currentStamina > 0f;
         bool wantRun = Input.GetKey(KeyCode.LeftShift) && canRun && enableRun;
@@ -80,7 +80,7 @@ public class PlayerController : MonoBehaviour {
             prevStamina = currentStamina;
 
             currentStamina -= staminaDepleteRate * Time.deltaTime;
-            
+
 
             if (currentStamina < 0) { currentStamina = 0; }
         } else {
@@ -137,11 +137,31 @@ public class PlayerController : MonoBehaviour {
     }
 
     void UpdateUI() {
-        string noiseLabel = "SILENT";
-        if (state == MoveState.Walk) noiseLabel = "LOW";
-        if (state == MoveState.Run) noiseLabel = "LOUD";
+        float animationSpeed = 0f;
+        int soundSpriteIndex = 0;
 
-        // UIManager.Instance.UpdateNoise(noiseLabel);
-        // UIManager.Instance.UpdateStamina(currentStamina, maxStamina);
+        switch (state) {
+            case MoveState.Idle:
+                animationSpeed = 0f;
+                soundSpriteIndex = 0;
+                break;
+            case MoveState.Crouch:
+                animationSpeed = 0f;
+                soundSpriteIndex = 0;
+                break;
+            case MoveState.Walk:
+                animationSpeed = 0.5f;
+                soundSpriteIndex = 1;
+                break;
+            case MoveState.Run:
+                animationSpeed = 1f;
+                soundSpriteIndex = 2;
+                break;
+        }
+
+        if (UIManager.Instance != null) {
+            UIManager.Instance.UpdateSoundIndicator(animationSpeed, soundSpriteIndex);
+            UIManager.Instance.UpdateStaminaUI(currentStamina, maxStamina);
+        }
     }
 }

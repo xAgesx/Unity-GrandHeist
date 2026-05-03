@@ -97,6 +97,7 @@ public class SecurityCamera : MonoBehaviour {
     void HandleDetectionLogic(bool canSee) {
         if (canSee) {
             detectionMeter = detectionMeter + Time.deltaTime;
+            UIManager.Instance.UpdateDetectionUI(detectionMeter, timeToLose);
 
             if (AlertManager.Instance != null) {
                 AlertManager.Instance.TriggerAlarm(player.position);
@@ -108,6 +109,7 @@ public class SecurityCamera : MonoBehaviour {
         } else {
             detectionMeter = detectionMeter - Time.deltaTime;
             if (detectionMeter < 0) { detectionMeter = 0; }
+            UIManager.Instance.UpdateDetectionUI(detectionMeter, timeToLose);
         }
     }
 

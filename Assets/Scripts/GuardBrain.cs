@@ -103,6 +103,7 @@ public class GuardBrain : MonoBehaviour {
                 SetState(GuardState.Chase);
         } else {
             catchTimer = Mathf.Max(0f, catchTimer - Time.deltaTime * 1.5f);
+            UIManager.Instance.UpdateDetectionUI(catchTimer, catchTime);
         }
 
         TickSoundMeter();

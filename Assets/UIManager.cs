@@ -1,8 +1,8 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
-{
+public class UIManager : MonoBehaviour {
     public static UIManager Instance { get; private set; }
 
     [Header("HUD")]
@@ -17,8 +17,23 @@ public class UIManager : MonoBehaviour
     public Color inactiveColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
     public Color activeColor = Color.white;
 
-    void Awake()
-    {
+    [Header("Detection Meter")]
+    public Image detectionCircle;
+    public CanvasGroup detectionCanvasGroup;
+    public float fadeSpeed = 5f;
+    [Header("Sound Indicator")]
+    public Image soundIcon;
+    public Animator soundAnimator;
+    public Sprite spriteMute;
+    public Sprite spriteEmitting;
+    public Sprite spriteLoud;
+    [Header("Hethi Stamina")]
+    public Slider staminaSlider;
+    public Image staminaFillImage;
+    public Sprite staminaFillImageExhausted;
+    public Sprite staminaFillImageDefault;
+
+    void Awake() {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
@@ -27,21 +42,53 @@ public class UIManager : MonoBehaviour
         promptText.text = "";
     }
 
-    public void UpdateHUD(string state, int cardCount, string noiseMsg)
-    {
+    public void UpdateHUD(string state, int cardCount, string noiseMsg) {
         if (statusText) statusText.text = $"State: {state}";
         if (noiseText) noiseText.text = $"Sound: {noiseMsg}";
     }
 
-    public void UpdateKeycards(bool hasGreen, bool hasBlue, bool hasRed)
-    {
+    public void UpdateKeycards(bool hasGreen, bool hasBlue, bool hasRed) {
         iconGreen.color = hasGreen ? activeColor : inactiveColor;
         iconBlue.color = hasBlue ? activeColor : inactiveColor;
         iconRed.color = hasRed ? activeColor : inactiveColor;
     }
+    public void UpdateDetectionUI(float currentTimer, float maxTimer) {
+        if (currentTimer > 0) {
+            detectionCanvasGroup.alpha = 1f;
+            detectionCircle.fillAmount = 1f - (currentTimer / maxTimer);
+        } else {
+            if (detectionCanvasGroup.alpha > 0) {
+                detectionCanvasGroup.alpha = Mathf.MoveTowards(detectionCanvasGroup.alpha, 0f, fadeSpeed * Time.deltaTime);
+            }
+        }
+    }
+    public void UpdateSoundIndicator(float speed, int stateIndex) {
+        if (soundAnimator != null) {
+            soundAnimator.speed = speed;
+        }
 
-    public void SetPrompt(string message)
-    {
+        if (soundIcon != null) {
+            if (stateIndex == 0) {
+                soundIcon.sprite = spriteMute;
+            } else if (stateIndex == 1) {
+                soundIcon.sprite = spriteEmitting;
+            } else if (stateIndex == 2) {
+                soundIcon.sprite = spriteLoud;
+            }
+        }
+    }
+
+    public void SetPrompt(string message) {
         promptText.text = message;
+    }
+
+    public void UpdateStaminaUI(float currentStamina, float maxStamina) {
+        if (staminaSlider != null) {
+            staminaSlider.value = currentStamina / maxStamina;
+            
+            staminaFillImage.sprite = (currentStamina < 10)?staminaFillImageExhausted : staminaFillImageDefault;
+            
+            
+        }
     }
 }
