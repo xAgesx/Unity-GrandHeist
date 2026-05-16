@@ -37,6 +37,8 @@ public class PlayerController : MonoBehaviour {
     float yVel;
     public HashSet<KeycardColor> inventory = new HashSet<KeycardColor>();
 
+    public List<GameObject> interactablesInRange = new List<GameObject>();
+
     void Awake() {
         cc = GetComponent<CharacterController>();
         cam = Camera.main.transform;
@@ -45,9 +47,72 @@ public class PlayerController : MonoBehaviour {
     }
 
     void Update() {
+        HandleInteraction();
         HandleMovement();
         SmoothCrouch();
         UpdateUI();
+    }
+
+    void HandleInteraction() {
+        if (Input.GetKeyDown(KeyCode.E) && interactablesInRange.Count > 0) {
+            GameObject target = interactablesInRange[0];
+
+            if (target.CompareTag("Keycard")) {
+                Keycard kc = target.GetComponent<Keycard>();
+                if (kc != null) {
+                    kc.Pickup(this);
+                    interactablesInRange.RemoveAt(0);
+                    RefreshInteractionFocus();
+                    UIManager.Instance.AdvanceOutline();
+                }
+            } else if (target.CompareTag("Door")) {
+                LockedDoor door = target.GetComponent<LockedDoor>();
+                if (door != null && door.Open(this)) {
+                    interactablesInRange.RemoveAt(0);
+                    RefreshInteractionFocus();
+                    UIManager.Instance.AdvanceOutline();
+                }
+            }
+        }
+    }
+
+    public void RegisterInteractable(GameObject obj) {
+        if (!interactablesInRange.Contains(obj)) {
+            interactablesInRange.Add(obj);
+            RefreshInteractionFocus();
+        }
+    }
+
+    public void UnregisterInteractable(GameObject obj) {
+        if (interactablesInRange.Remove(obj)) {
+            RefreshInteractionFocus();
+        }
+    }
+
+    private void RefreshInteractionFocus() {
+        if (interactablesInRange.Count > 0) {
+            GameObject first = interactablesInRange[0];
+
+            if (first.CompareTag("Keycard")) {
+                Keycard kc = first.GetComponent<Keycard>();
+                if (kc != null) {
+                    UIManager.Instance.SetPrompt("Press [E] to pick up " + kc.cardColor + " card");
+                }
+            } else if (first.CompareTag("Door")) {
+                LockedDoor door = first.GetComponent<LockedDoor>();
+                if (door != null) {
+                    if (inventory.Contains(door.requiredCard)) {
+                        UIManager.Instance.SetPrompt("Press [E] to open door");
+                    } else {
+                        UIManager.Instance.SetPrompt("Requires " + door.requiredCard + " card");
+                    }
+                }
+            }
+        } else {
+            if (UIManager.Instance != null) {
+                UIManager.Instance.SetPrompt("");
+            }
+        }
     }
 
     public void AddKeycard(KeycardColor color) {

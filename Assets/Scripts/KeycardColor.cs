@@ -6,35 +6,28 @@ public class Keycard : MonoBehaviour {
     public KeycardColor cardColor;
     public Renderer cardRenderer;
     public Color highlightColor = Color.white;
-    private bool playerNearby;
     private PlayerController playerRef;
 
-    void Update() {
-        if (playerNearby && Input.GetKeyDown(KeyCode.E)) {
-            playerRef.AddKeycard(cardColor);
-            UIManager.Instance.SetPrompt("");
-            UIManager.Instance.outlines.RemoveAt(0);
-            Destroy(gameObject);
-        }
+    public void Pickup(PlayerController player) {
+        player.AddKeycard(cardColor);
+        Destroy(gameObject);
     }
 
     void OnTriggerEnter(Collider other) {
         if (other.CompareTag("Player")) {
-            playerNearby = true;
             playerRef = other.GetComponent<PlayerController>();
             SetHighlight(true);
-            UIManager.Instance.ToggleOutline();
-            UIManager.Instance.SetPrompt("Press [E] to pick up " + cardColor + " card");
+            playerRef.RegisterInteractable(gameObject);
         }
     }
 
     void OnTriggerExit(Collider other) {
         if (other.CompareTag("Player")) {
-            playerNearby = false;
             SetHighlight(false);
-            UIManager.Instance.SetPrompt("");
-            UIManager.Instance.ToggleOutline();
-
+            if (playerRef != null) {
+                playerRef.UnregisterInteractable(gameObject);
+                playerRef = null;
+            }
         }
     }
 

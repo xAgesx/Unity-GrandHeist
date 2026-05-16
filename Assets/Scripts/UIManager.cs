@@ -12,14 +12,15 @@ public class UIManager : MonoBehaviour {
     public Text noiseText;
     public TextMeshProUGUI promptText;
 
+    public List<Outline> outlines;
+    public int currentOutlineIndex;
+
     [Header("Keycards Visuals")]
     public Image iconGreen;
     public Image iconBlue;
     public Image iconRed;
     public Color inactiveColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
     public Color activeColor = Color.white;
-    public List<Outline> outlines;
-    public int currentOutlineIndex ;
 
     [Header("Detection Meter")]
     public Image detectionCircle;
@@ -43,6 +44,20 @@ public class UIManager : MonoBehaviour {
 
         iconGreen.color = iconBlue.color = iconRed.color = inactiveColor;
         promptText.text = "";
+
+        for (int i = 0; i < outlines.Count; i++) {
+            outlines[i].enabled = i == 0;
+        }
+    }
+
+    public void AdvanceOutline() {
+        if (currentOutlineIndex < outlines.Count && outlines[currentOutlineIndex] != null) {
+            outlines[currentOutlineIndex].enabled = false;
+        }
+        currentOutlineIndex = Mathf.Min(currentOutlineIndex + 1, outlines.Count - 1);
+        if (currentOutlineIndex < outlines.Count && outlines[currentOutlineIndex] != null) {
+            outlines[currentOutlineIndex].enabled = true;
+        }
     }
 
     public void UpdateHUD(string state, int cardCount, string noiseMsg) {
@@ -84,9 +99,6 @@ public class UIManager : MonoBehaviour {
     public void SetPrompt(string message) {
         promptText.text = message;
         
-    }
-    public void ToggleOutline() {
-        outlines[currentOutlineIndex].enabled = !outlines[currentOutlineIndex].enabled;
     }
     public void UpdateStaminaUI(float currentStamina, float maxStamina) {
         if (staminaSlider != null) {
