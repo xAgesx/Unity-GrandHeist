@@ -39,7 +39,7 @@ public class GuardBrain : MonoBehaviour {
 
     [Header("Animation")]
     public Animator animator;
-    public string speedParam = "Speed";
+    public float crossFadeDuration = 0.15f;
 
     [Header("Flashlight")]
     public Light flashlight;
@@ -366,7 +366,9 @@ public class GuardBrain : MonoBehaviour {
     }
 
     void UpdateAnimator() {
-        if (animator) animator.SetFloat(speedParam, agent.velocity.magnitude);
+        if (!animator) return;
+
+        animator.SetFloat("Speed", agent.velocity.magnitude > 0.5f ? 1f : 0f);
     }
 
     void OnDrawGizmosSelected() {

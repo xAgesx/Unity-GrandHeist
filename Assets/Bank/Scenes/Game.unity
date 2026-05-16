@@ -6968,6 +6968,11 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 199472, guid: 7ff387e26f5e0ca4ca737283862d87ca, type: 3}
   m_PrefabInstance: {fileID: 1042366129}
   m_PrefabAsset: {fileID: 0}
+--- !u!95 &227494756 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 9531150, guid: 7ff387e26f5e0ca4ca737283862d87ca, type: 3}
+  m_PrefabInstance: {fileID: 1042366129}
+  m_PrefabAsset: {fileID: 0}
 --- !u!114 &227494758
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -7002,11 +7007,11 @@ MonoBehaviour:
   searchDuration: 8
   patrolSpeed: 2.5
   chaseSpeed: 1.2
-  catchTime: 0.5
+  catchTime: 80
   soundMeterMax: 0.4
   soundMeterDecay: 0.1
-  animator: {fileID: 0}
-  speedParam: Speed
+  animator: {fileID: 227494756}
+  crossFadeDuration: 0.15
   flashlight: {fileID: 643252589}
   flashlightPatrol: {r: 1, g: 0.85, b: 0.6, a: 1}
   flashlightAlerted: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
@@ -19901,13 +19906,13 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 643252585}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.6776796, y: -0.010527741, z: 0.67087173, w: 0.3009495}
+  m_LocalRotation: {x: -0.9370403, y: -0.0027419617, z: 0.34919196, w: -0.0036004172}
   m_LocalPosition: {x: -0.0006155237, y: 0.000011225484, z: -0.0005212799}
   m_LocalScale: {x: 24.999985, y: 25, z: 25}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 2107218286}
-  m_LocalEulerAnglesHint: {x: -23.189, y: -84.927, z: 152.947}
+  m_LocalEulerAnglesHint: {x: 0.496, y: -139.124, z: 179.85}
 --- !u!114 &643252587
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -33846,7 +33851,7 @@ MonoBehaviour:
   soundMeterMax: 0.4
   soundMeterDecay: 0.1
   animator: {fileID: 0}
-  speedParam: Speed
+  crossFadeDuration: 0.15
   flashlight: {fileID: 839650320}
   flashlightPatrol: {r: 1, g: 0.85, b: 0.6, a: 1}
   flashlightAlerted: {r: 1, g: 0.92156863, b: 0.015686275, a: 1}
