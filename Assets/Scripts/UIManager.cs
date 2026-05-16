@@ -1,14 +1,16 @@
 using System;
+using System.Collections.Generic;
+using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour {
-    public static UIManager Instance { get; private set; }
+    public static UIManager Instance { get;  set; }
 
     [Header("HUD")]
     public Text statusText;
     public Text noiseText;
-    public Text promptText;
+    public TextMeshProUGUI promptText;
 
     [Header("Keycards Visuals")]
     public Image iconGreen;
@@ -16,6 +18,8 @@ public class UIManager : MonoBehaviour {
     public Image iconRed;
     public Color inactiveColor = new Color(0.2f, 0.2f, 0.2f, 0.5f);
     public Color activeColor = Color.white;
+    public List<Outline> outlines;
+    public int currentOutlineIndex ;
 
     [Header("Detection Meter")]
     public Image detectionCircle;
@@ -37,7 +41,6 @@ public class UIManager : MonoBehaviour {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
 
-        // Set icons to inactive at start
         iconGreen.color = iconBlue.color = iconRed.color = inactiveColor;
         promptText.text = "";
     }
@@ -80,8 +83,11 @@ public class UIManager : MonoBehaviour {
 
     public void SetPrompt(string message) {
         promptText.text = message;
+        
     }
-
+    public void ToggleOutline() {
+        outlines[currentOutlineIndex].enabled = !outlines[currentOutlineIndex].enabled;
+    }
     public void UpdateStaminaUI(float currentStamina, float maxStamina) {
         if (staminaSlider != null) {
             staminaSlider.value = currentStamina / maxStamina;

@@ -57,6 +57,7 @@ public class GuardBrain : MonoBehaviour {
     public float stateTimer;
     public float catchTimer;
     public Vector3 lastKnownPos;
+    public GameObject guardNotif;
 
     NavMeshAgent agent;
     Transform player;
@@ -72,6 +73,7 @@ public class GuardBrain : MonoBehaviour {
     float searchPointTimer;
 
     void Start() {
+        guardNotif.SetActive(false);
         agent = GetComponent<NavMeshAgent>();
         var p = GameObject.FindWithTag("Player");
         if (p != null) { player = p.transform; playerCtrl = p.GetComponent<PlayerController>(); }
@@ -193,9 +195,14 @@ public class GuardBrain : MonoBehaviour {
 
         if (soundMeter >= soundMeterMax) {
             soundMeter = 0f;
+            guardNotif.SetActive(true);
+            Debug.Log("Heard ya!"); 
             SetState(GuardState.ChaseSound);
         } else if (currentState == GuardState.Patrol || currentState == GuardState.Search) {
             SetState(GuardState.TurnToSound);
+            guardNotif.SetActive(false);
+
+            
         }
     }
 
