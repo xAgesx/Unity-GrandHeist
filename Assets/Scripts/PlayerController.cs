@@ -2,7 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [RequireComponent(typeof(CharacterController))]
+[RequireComponent(typeof(Animator))]
 public class PlayerController : MonoBehaviour {
+    Animator anim;
+
     public float walkSpeed = 3.5f;
     public float runSpeed = 7f;
     public float crouchSpeed = 1.5f;
@@ -41,6 +44,7 @@ public class PlayerController : MonoBehaviour {
 
     void Awake() {
         cc = GetComponent<CharacterController>();
+        anim = GetComponent<Animator>();
         cam = Camera.main.transform;
         currentStamina = maxStamina;
         state = MoveState.Idle;
@@ -177,6 +181,15 @@ public class PlayerController : MonoBehaviour {
             else if (state == MoveState.Walk) EmitNoise(walkNoiseRadius, walkNoiseFill);
         }
 
+        UpdateAnimator();
+    }
+
+    void UpdateAnimator() {
+        float speed = 0f;
+        if (state == MoveState.Walk) speed = 0.3f;
+        else if (state == MoveState.Run) speed = 1f;
+        anim.SetFloat("Speed", speed);
+        anim.SetBool("IsCrouching", IsCrouching);
     }
 
     void SmoothCrouch() {
