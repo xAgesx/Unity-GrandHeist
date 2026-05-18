@@ -51840,9 +51840,6 @@ MonoBehaviour:
   runNoiseFill: 1.2
   walkNoiseRadius: 6
   runNoiseRadius: 14
-  guardLayer:
-    serializedVersion: 2
-    m_Bits: 128
   maxStamina: 25
   staminaDepleteRate: 25
   staminaRegenRate: 2
@@ -58143,9 +58140,6 @@ MonoBehaviour:
   runNoiseFill: 1.2
   walkNoiseRadius: 6
   runNoiseRadius: 14
-  guardLayer:
-    serializedVersion: 2
-    m_Bits: 128
   maxStamina: 500
   staminaDepleteRate: 25
   staminaRegenRate: 2
@@ -76666,7 +76660,9 @@ SceneRoots:
   - {fileID: 724024293}
   - {fileID: 920772573}
   - {fileID: 1348702081}
+  - {fileID: 1237543667}
   - {fileID: 1540609965}
+  - {fileID: 1042366129}
   - {fileID: 1119914312}
   - {fileID: 126985721}
   - {fileID: 2074597865}
@@ -76680,7 +76676,6 @@ SceneRoots:
   - {fileID: 730578395}
   - {fileID: 1165127414}
   - {fileID: 2840253}
-  - {fileID: 1042366129}
   - {fileID: 1146406098}
   - {fileID: 2089218475}
   - {fileID: 659479168}
@@ -76690,4 +76685,3 @@ SceneRoots:
   - {fileID: 1837177981}
   - {fileID: 219433121}
   - {fileID: 1369376942}
-  - {fileID: 1237543667}

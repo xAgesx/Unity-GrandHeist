@@ -19,8 +19,6 @@ public class PlayerController : MonoBehaviour {
     public float runNoiseFill = 2.5f;
     public float walkNoiseRadius = 7f;
     public float runNoiseRadius = 16f;
-    public LayerMask guardLayer;
-
     public float maxStamina = 100f;
     public float staminaDepleteRate = 25f;
     public float staminaRegenRate = 15f;
@@ -203,14 +201,12 @@ public class PlayerController : MonoBehaviour {
     }
 
     void EmitNoise(float radius, float fillPerSecond) {
-        Collider[] hits = Physics.OverlapSphere(transform.position, radius, guardLayer);
-        foreach (var h in hits) {
-            GuardBrain brain = h.GetComponent<GuardBrain>();
-            if (brain != null) {
-                float dist = Vector3.Distance(transform.position, h.transform.position);
-                float falloff = Mathf.Pow(1f - Mathf.Clamp01(dist / radius), 3f);
-                brain.OnHearNoise(transform.position, fillPerSecond * falloff * Time.deltaTime);
-            }
+        GuardBrain[] guards = FindObjectsOfType<GuardBrain>();
+        for (int i = 0; i < guards.Length; i++) {
+            float dist = Vector3.Distance(transform.position, guards[i].transform.position);
+            if (dist > radius) continue;
+            float falloff = Mathf.Pow(1f - Mathf.Clamp01(dist / radius), 3f);
+            guards[i].OnHearNoise(transform.position, fillPerSecond * falloff * Time.deltaTime);
         }
     }
 
