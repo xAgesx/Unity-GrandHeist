@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -7,6 +8,8 @@ public class GameManager : MonoBehaviour {
     public bool isGameOver;
 
     void Awake() {
+        Time.timeScale = 1f;
+
         if (Instance == null) {
             Instance = this;
         } else {
@@ -40,9 +43,16 @@ public class GameManager : MonoBehaviour {
         }
 
         isGameOver = true;
-        SoundManager.Instance.PlaySFX(SoundManager.Instance.musicGameOver);
+
         if (GameOverUI.Instance != null) {
             GameOverUI.Instance.ShowGameOver();
         }
+
+        StartCoroutine(PauseAfterDelay());
+    }
+
+    IEnumerator PauseAfterDelay() {
+        yield return new WaitForSecondsRealtime(1f);
+        Time.timeScale = 0f;
     }
 }
