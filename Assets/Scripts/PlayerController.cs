@@ -44,9 +44,11 @@ public class PlayerController : MonoBehaviour {
     void Awake() {
         cc = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
+        anim.applyRootMotion = false;
         cam = Camera.main.transform;
         currentStamina = maxStamina;
         state = MoveState.Idle;
+         anim.applyRootMotion = false;
     }
 
     void Update() {
@@ -201,7 +203,8 @@ public class PlayerController : MonoBehaviour {
 
     void UpdateAnimator() {
         float speed = 0f;
-        if (state == MoveState.Walk) speed = 0.3f;
+        if (state == MoveState.Crouch) speed = 0.15f;
+        else if (state == MoveState.Walk) speed = 0.3f;
         else if (state == MoveState.Run) speed = 1f;
         anim.SetFloat("Speed", speed);
         anim.SetBool("IsCrouching", IsCrouching);

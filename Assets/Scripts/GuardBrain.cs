@@ -58,6 +58,7 @@ public class GuardBrain : MonoBehaviour {
     public float catchTimer;
     public Vector3 lastKnownPos;
     public GameObject guardNotif;
+    public GameObject notifSus;
 
     NavMeshAgent agent;
     Transform player;
@@ -74,6 +75,7 @@ public class GuardBrain : MonoBehaviour {
 
     void Start() {
         guardNotif.SetActive(false);
+        if (notifSus != null) notifSus.SetActive(false);
         agent = GetComponent<NavMeshAgent>();
         var p = GameObject.FindWithTag("Player");
         if (p != null) { player = p.transform; playerCtrl = p.GetComponent<PlayerController>(); }
@@ -119,6 +121,9 @@ public class GuardBrain : MonoBehaviour {
         stateTimer = 0f;
         if (notif) notif.text = "";
 
+        guardNotif.SetActive(false);
+        if (notifSus != null) notifSus.SetActive(false);
+
         if (agent.isOnNavMesh) agent.ResetPath();
         if (agent.isStopped) agent.isStopped = false;
 
@@ -132,27 +137,26 @@ public class GuardBrain : MonoBehaviour {
                 break;
 
             case GuardState.Chase:
+                guardNotif.SetActive(true);
                 agent.speed = chaseSpeed;
                 break;
 
             case GuardState.ChaseSound:
-                agent.speed = chaseSpeed;
-                agent.SetDestination(GetValidNavMeshPos(lastKnownPos));
-                break;
-
             case GuardState.TurnToSound:
-                agent.speed = chaseSpeed * 0.7f;
-                agent.SetDestination(GetValidNavMeshPos(lastKnownPos));
-                break;
-
             case GuardState.Search:
-                searchPointIndex = 0;
-                searchPointTimer = 0f;
-                agent.speed = patrolSpeed;
-                GenerateSearchPoints();
-                if (searchPoints != null && searchPoints.Length > 0)
-                    agent.SetDestination(searchPoints[0]);
+                if (notifSus != null) notifSus.SetActive(true);
+                agent.speed = s == GuardState.ChaseSound ? chaseSpeed : s == GuardState.Search ? patrolSpeed : chaseSpeed * 0.7f;
+                if (s != GuardState.Search)
+                    agent.SetDestination(GetValidNavMeshPos(lastKnownPos));
                 break;
+        }
+
+        if (s == GuardState.Search) {
+            searchPointIndex = 0;
+            searchPointTimer = 0f;
+            GenerateSearchPoints();
+            if (searchPoints != null && searchPoints.Length > 0)
+                agent.SetDestination(searchPoints[0]);
         }
     }
 
@@ -195,14 +199,9 @@ public class GuardBrain : MonoBehaviour {
 
         if (soundMeter >= soundMeterMax) {
             soundMeter = 0f;
-            guardNotif.SetActive(true);
-            Debug.Log("Heard ya!"); 
             SetState(GuardState.ChaseSound);
         } else if (currentState == GuardState.Patrol || currentState == GuardState.Search) {
             SetState(GuardState.TurnToSound);
-            guardNotif.SetActive(false);
-
-            
         }
     }
 

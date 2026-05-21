@@ -98,7 +98,9 @@ public class UIManager : MonoBehaviour {
 
     public void SetPrompt(string message) {
         promptText.text = message;
-        
+        if (PlayerNotif.Instance != null) {
+            PlayerNotif.Instance.Show(message);
+        }
     }
     public void UpdateStaminaUI(float currentStamina, float maxStamina) {
         if (staminaSlider != null) {

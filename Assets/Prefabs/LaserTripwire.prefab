@@ -151,9 +151,9 @@ MonoBehaviour:
   movePingPong: 1
   movePause: 0
   beamColor: {r: 1, g: 0.15, b: 0.05, a: 1}
-  glowColor: {r: 0.13207549, g: 0.11951586, b: 0.11637595, a: 1}
+  glowColor: {r: 1, g: 0.54901963, b: 0, a: 1}
   beamWidth: 0.06
-  glowWidth: 0.3
+  glowWidth: 0.15
   pulseSpeed: 1.5
   pulseWidth: 2
   flickerAmount: 0.08
