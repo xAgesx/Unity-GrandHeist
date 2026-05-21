@@ -117,7 +117,7 @@ public class LaserTripwire : MonoBehaviour
 
     void Update()
     {
-        if (triggered) return;
+        if (triggered) {SoundManager.Instance.PlaySFX(SoundManager.Instance.sfxLaserAlert);return;};
 
         UpdateSweep();
         UpdateMovement();

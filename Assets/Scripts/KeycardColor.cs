@@ -10,6 +10,7 @@ public class Keycard : MonoBehaviour {
 
     public void Pickup(PlayerController player) {
         player.AddKeycard(cardColor);
+        SoundManager.Instance.PlaySFX(SoundManager.Instance.sfxKeycardPickup);
         Destroy(gameObject);
     }
 

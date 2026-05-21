@@ -11,7 +11,11 @@ public class GameManager : MonoBehaviour {
             Instance = this;
         } else {
             Destroy(gameObject);
+            return;
         }
+
+        if (GetComponent<SoundManager>() == null)
+            gameObject.AddComponent<SoundManager>();
     }
 
     void Update() {
@@ -36,7 +40,7 @@ public class GameManager : MonoBehaviour {
         }
 
         isGameOver = true;
-
+        SoundManager.Instance.PlaySFX(SoundManager.Instance.musicGameOver);
         if (GameOverUI.Instance != null) {
             GameOverUI.Instance.ShowGameOver();
         }

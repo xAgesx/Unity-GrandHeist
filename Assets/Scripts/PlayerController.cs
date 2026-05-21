@@ -34,6 +34,7 @@ public class PlayerController : MonoBehaviour {
     bool enableRun = true;
     private float prevStamina = 30f;
     CharacterController cc;
+    float footstepTimer;
     Transform cam;
     float yVel;
     public HashSet<KeycardColor> inventory = new HashSet<KeycardColor>();
@@ -180,6 +181,22 @@ public class PlayerController : MonoBehaviour {
         }
 
         UpdateAnimator();
+
+        float interval = state switch {
+            MoveState.Crouch => 0.6f,
+            MoveState.Walk => 0.45f,
+            MoveState.Run => 0.3f,
+            _ => 0f
+        };
+        if (interval > 0f && moving) {
+            footstepTimer -= Time.deltaTime;
+            if (footstepTimer <= 0f) {
+                footstepTimer = interval;
+                SoundManager.Instance.PlayFootstep(state);
+            }
+        } else {
+            footstepTimer = 0f;
+        }
     }
 
     void UpdateAnimator() {

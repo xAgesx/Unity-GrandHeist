@@ -9,8 +9,9 @@ public class LockedDoor : MonoBehaviour {
 
     public bool Open(PlayerController player) {
         if (opened) return false;
-        if (!player.inventory.Contains(requiredCard)) return false;
+        if (!player.inventory.Contains(requiredCard)) {SoundManager.Instance.PlaySFX(SoundManager.Instance.sfxDoorLocked);return false;};
         opened = true;
+        SoundManager.Instance.PlaySFX(SoundManager.Instance.sfxDoorOpen);
         if (animator != null) {
             animator.Play();
         }
