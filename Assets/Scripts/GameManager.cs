@@ -1,12 +1,28 @@
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
     public bool isGameOver;
+    public GameObject overlayUI;
+    public GameObject pausePanel;
+    public Image musicButtonImage;
+    public Image soundButtonImage;
+    public Sprite musicOnSprite;
+    public Sprite musicOffSprite;
+    public Sprite soundOnSprite;
+    public Sprite soundOffSprite;
+
+    public bool IsPaused { get; private set; }
+    public bool MusicOn { get; private set; } = true;
+    public bool SoundOn { get; private set; } = true;
+
+    float prevMusicVolume = 1f;
+    float prevSfxVolume = 1f;
 
     void Awake()
     {
@@ -28,22 +44,92 @@ public class GameManager : MonoBehaviour
 
     void Update()
     {
-        // Global restart check
         if (Input.GetKeyDown(KeyCode.R))
         {
+            if (IsPaused) TogglePause();
             RestartLevel();
         }
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            Application.Quit();
+            if (isGameOver) return;
+            TogglePause();
         }
+    }
+
+    public void TogglePause()
+    {
+        IsPaused = !IsPaused;
+
+        if (IsPaused)
+        {
+            if (overlayUI != null) overlayUI.SetActive(false);
+            if (pausePanel != null) pausePanel.SetActive(true);
+            Time.timeScale = 0f;
+        }
+        else
+        {
+            if (overlayUI != null) overlayUI.SetActive(true);
+            if (pausePanel != null) pausePanel.SetActive(false);
+            Time.timeScale = 1f;
+        }
+    }
+
+    public void Resume()
+    {
+        if (!IsPaused) return;
+        TogglePause();
+    }
+
+    public void ExitToMainMenu()
+    {
+        IsPaused = false;
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void RestartLevel()
     {
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentSceneIndex);
+    }
+
+    public void ToggleMusic()
+    {
+        MusicOn = !MusicOn;
+        if (SoundManager.Instance == null) return;
+
+        if (MusicOn)
+        {
+            SoundManager.Instance.SetMusicVolume(prevMusicVolume);
+        }
+        else
+        {
+            prevMusicVolume = SoundManager.Instance.musicVolume;
+            SoundManager.Instance.SetMusicVolume(0f);
+        }
+
+        if (musicButtonImage != null)
+            musicButtonImage.sprite = MusicOn ? musicOnSprite : musicOffSprite;
+    }
+
+    public void ToggleSound()
+    {
+        SoundOn = !SoundOn;
+        if (SoundManager.Instance == null) return;
+
+        if (SoundOn)
+        {
+            SoundManager.Instance.SetSFXVolume(prevSfxVolume);
+        }
+        else
+        {
+            prevSfxVolume = SoundManager.Instance.sfxVolume;
+            SoundManager.Instance.SetSFXVolume(0f);
+        }
+
+        if (soundButtonImage != null)
+            soundButtonImage.sprite = SoundOn ? soundOnSprite : soundOffSprite;
     }
 
     public void TriggerGameOver()
