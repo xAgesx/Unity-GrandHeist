@@ -8,18 +8,18 @@ public class GameOverUI : MonoBehaviour
 
     [Header("UI References")]
     public GameObject panel;
-    public Text       messageText;
-    public Text       hintText;
+    public Text messageText;
+    public Text hintText;
 
     [Header("Message")]
-    public string deathMessage  = "YOU'VE BEEN CAUGHT";
-    public string restartHint   = "Press R to try again";
+    public string deathMessage = "YOU'VE BEEN CAUGHT";
+    public string restartHint = "Press R to try again";
 
     [Header("Fade")]
     public float fadeDuration = 0.6f;
 
     CanvasGroup canvasGroup;
-    bool        isShowing;
+    bool isShowing;
 
     void Awake()
     {
@@ -45,7 +45,7 @@ public class GameOverUI : MonoBehaviour
         isShowing = true;
 
         if (messageText != null) messageText.text = deathMessage;
-        if (hintText != null)    hintText.text    = restartHint;
+        if (hintText != null) hintText.text = restartHint;
 
         panel.SetActive(true);
         canvasGroup.alpha = 0f;

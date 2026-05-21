@@ -2,17 +2,22 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
-public class GameManager : MonoBehaviour {
+public class GameManager : MonoBehaviour
+{
     public static GameManager Instance { get; private set; }
 
     public bool isGameOver;
 
-    void Awake() {
+    void Awake()
+    {
         Time.timeScale = 1f;
 
-        if (Instance == null) {
+        if (Instance == null)
+        {
             Instance = this;
-        } else {
+        }
+        else
+        {
             Destroy(gameObject);
             return;
         }
@@ -21,37 +26,50 @@ public class GameManager : MonoBehaviour {
             gameObject.AddComponent<SoundManager>();
     }
 
-    void Update() {
+    void Update()
+    {
         // Global restart check
-        if (Input.GetKeyDown(KeyCode.R)) {
+        if (Input.GetKeyDown(KeyCode.R))
+        {
             RestartLevel();
         }
 
-        if (Input.GetKeyDown(KeyCode.Escape)) {
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
             Application.Quit();
         }
     }
 
-    public void RestartLevel() {
+    public void RestartLevel()
+    {
         int currentSceneIndex = SceneManager.GetActiveScene().buildIndex;
         SceneManager.LoadScene(currentSceneIndex);
     }
 
-    public void TriggerGameOver() {
-        if (isGameOver) {
+    public void TriggerGameOver()
+    {
+        if (isGameOver)
+        {
             return;
         }
 
         isGameOver = true;
 
-        if (GameOverUI.Instance != null) {
+        if (GameOverUI.Instance != null)
+        {
             GameOverUI.Instance.ShowGameOver();
+        }
+
+        if (SoundManager.Instance != null)
+        {
+            SoundManager.Instance.PlayMusic(SoundManager.Instance.musicGameOver);
         }
 
         StartCoroutine(PauseAfterDelay());
     }
 
-    IEnumerator PauseAfterDelay() {
+    IEnumerator PauseAfterDelay()
+    {
         yield return new WaitForSecondsRealtime(1f);
         Time.timeScale = 0f;
     }

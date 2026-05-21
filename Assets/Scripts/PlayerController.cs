@@ -48,7 +48,7 @@ public class PlayerController : MonoBehaviour {
         cam = Camera.main.transform;
         currentStamina = maxStamina;
         state = MoveState.Idle;
-         anim.applyRootMotion = false;
+        anim.applyRootMotion = false;
     }
 
     void Update() {
@@ -130,13 +130,13 @@ public class PlayerController : MonoBehaviour {
     }
 
     void HandleMovement() {
-        
+
         enableRun = (prevStamina > currentStamina || currentStamina > 10);
 
 
         bool canRun = currentStamina > 0f;
         bool wantRun = Input.GetKey(KeyCode.LeftShift) && canRun && enableRun;
-        bool wantCrouch = Input.GetKey(KeyCode.LeftControl);
+        bool wantCrouch = Input.GetKey(KeyCode.LeftControl) | Input.GetKey(KeyCode.C);
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         bool moving = input.sqrMagnitude > 0.01f;
 

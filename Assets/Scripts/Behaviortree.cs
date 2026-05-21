@@ -1,8 +1,5 @@
 using System.Collections.Generic;
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Minimal Behavior Tree Framework
-// ─────────────────────────────────────────────────────────────────────────────
 
 public enum NodeStatus { Success, Failure, Running }
 
@@ -12,7 +9,6 @@ public abstract class Node
     public abstract NodeStatus Tick();
 }
 
-// ── Composites ────────────────────────────────────────────────────────────────
 
 /// <summary>
 /// Sequence: runs children left-to-right.
@@ -105,7 +101,6 @@ public class RepeatUntilFail : Node
     }
 }
 
-// ── Leaf helpers ──────────────────────────────────────────────────────────────
 
 /// <summary> Wraps a condition delegate as a leaf node. </summary>
 public class Condition : Node

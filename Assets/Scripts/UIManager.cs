@@ -71,6 +71,7 @@ public class UIManager : MonoBehaviour {
         iconRed.color = hasRed ? activeColor : inactiveColor;
     }
     public void UpdateDetectionUI(float currentTimer, float maxTimer) {
+        
         if (currentTimer > 0) {
             detectionCanvasGroup.alpha = 1f;
             detectionCircle.fillAmount = 1f - (currentTimer / maxTimer);

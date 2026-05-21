@@ -97,6 +97,7 @@ public class GuardBrain : MonoBehaviour {
 
         if (canSeePlayer) {
             catchTimer += Time.deltaTime;
+            UIManager.Instance.UpdateDetectionUI(catchTimer, catchTime);
             if (catchTimer >= catchTime) {
                 CatchPlayer();
                 return;
