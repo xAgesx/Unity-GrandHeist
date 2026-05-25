@@ -12,6 +12,9 @@ public class UIManager : MonoBehaviour {
     public Text noiseText;
     public TextMeshProUGUI promptText;
 
+    [Header("Timer")]
+    public TextMeshProUGUI timerText;
+
     public List<Outline> outlines;
     public int currentOutlineIndex;
 
@@ -48,6 +51,30 @@ public class UIManager : MonoBehaviour {
         for (int i = 0; i < outlines.Count; i++) {
             outlines[i].enabled = i == 0;
         }
+
+        if (timerText == null)
+            CreateTimerText();
+    }
+
+    void CreateTimerText()
+    {
+        Canvas canvas = GetComponentInParent<Canvas>();
+        if (canvas == null)
+            canvas = FindObjectOfType<Canvas>();
+
+        GameObject go = new GameObject("TimerText", typeof(TextMeshProUGUI));
+        go.transform.SetParent(canvas != null ? canvas.transform : transform, false);
+        RectTransform rt = go.GetComponent<RectTransform>();
+        rt.anchorMin = new Vector2(0.5f, 1f);
+        rt.anchorMax = new Vector2(0.5f, 1f);
+        rt.pivot = new Vector2(0.5f, 1f);
+        rt.anchoredPosition = new Vector2(0f, -10f);
+        rt.sizeDelta = new Vector2(200f, 40f);
+        timerText = go.GetComponent<TextMeshProUGUI>();
+        timerText.fontSize = 28f;
+        timerText.alignment = TextAlignmentOptions.Center;
+        timerText.color = Color.white;
+        timerText.text = "00:00";
     }
 
     public void AdvanceOutline() {
@@ -95,6 +122,14 @@ public class UIManager : MonoBehaviour {
                 soundIcon.sprite = spriteLoud;
             }
         }
+    }
+
+    public void UpdateTimerDisplay(float elapsedSeconds)
+    {
+        if (timerText == null) return;
+        int minutes = Mathf.FloorToInt(elapsedSeconds / 60f);
+        int seconds = Mathf.FloorToInt(elapsedSeconds % 60f);
+        timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
     }
 
     public void SetPrompt(string message) {

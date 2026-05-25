@@ -8,6 +8,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance { get; private set; }
 
     public bool isGameOver;
+    public bool isGameWon;
     public GameObject overlayUI;
     public GameObject pausePanel;
     public Image musicButtonImage;
@@ -23,6 +24,11 @@ public class GameManager : MonoBehaviour
 
     float prevMusicVolume = 1f;
     float prevSfxVolume = 1f;
+
+    float elapsedTime;
+    bool timerRunning;
+
+    public float ElapsedTime => elapsedTime;
 
     void Awake()
     {
@@ -42,6 +48,11 @@ public class GameManager : MonoBehaviour
             gameObject.AddComponent<SoundManager>();
     }
 
+    void Start()
+    {
+        timerRunning = true;
+    }
+
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.R))
@@ -52,8 +63,15 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Escape))
         {
-            if (isGameOver) return;
+            if (isGameOver || isGameWon) return;
             TogglePause();
+        }
+
+        if (timerRunning && !IsPaused && !isGameOver && !isGameWon)
+        {
+            elapsedTime += Time.deltaTime;
+            if (UIManager.Instance != null)
+                UIManager.Instance.UpdateTimerDisplay(elapsedTime);
         }
     }
 
@@ -158,5 +176,20 @@ public class GameManager : MonoBehaviour
     {
         yield return new WaitForSecondsRealtime(1f);
         Time.timeScale = 0f;
+    }
+
+    public void TriggerWin()
+    {
+        if (isGameWon || isGameOver) return;
+        isGameWon = true;
+        timerRunning = false;
+
+        PlayerPrefs.SetFloat("LastTime", elapsedTime);
+        PlayerPrefs.Save();
+
+        if (SoundManager.Instance != null)
+            SoundManager.Instance.StopMusic();
+
+        SceneManager.LoadScene(2);
     }
 }

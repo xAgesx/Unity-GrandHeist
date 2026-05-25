@@ -7,4 +7,8 @@ public class SceneLoader : MonoBehaviour {
     public void QuitGame(){
         Application.Quit();
     }
+    public void Leaderboard() {
+        SceneManager.LoadScene(2);
+
+    }
 }

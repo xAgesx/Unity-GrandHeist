@@ -2,8 +2,14 @@ using UnityEngine;
 using UnityEngine.SceneManagement ;
 
 public class MenuManager : MonoBehaviour {
+    public static MenuManager Instance { get; private set; }
     public static int previousSceneIndex;
     public GameObject submitButton;
+
+    void Awake()
+    {
+        if (Instance == null) Instance = this;
+    }
 
     public void Start() {
         if (SceneManager.GetActiveScene().buildIndex != 2) {

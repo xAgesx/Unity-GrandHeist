@@ -3419,8 +3419,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9965e5a3afbe46c49af4de82aa33a56a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputScore: 0
-  inputName: {fileID: 80089780}
   webURL: http://dreamlo.com/lb/
   proxy: https://penguin-avalanche-proxy.thamer-douss.workers.dev/?url=
   names:
@@ -3435,6 +3433,8 @@ MonoBehaviour:
   - {fileID: 1594462257}
   - {fileID: 748566980}
   - {fileID: 1128058244}
+  submitSection: {fileID: 410643453}
+  inputName: {fileID: 80089780}
 --- !u!1 &1594462255
 GameObject:
   m_ObjectHideFlags: 0
@@ -3844,8 +3844,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9965e5a3afbe46c49af4de82aa33a56a, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  inputScore: 0
-  inputName: {fileID: 80089780}
   webURL: http://dreamlo.com/lb/
   proxy: https://penguin-avalanche-proxy.thamer-douss.workers.dev/?url=
   names:
@@ -3860,6 +3858,8 @@ MonoBehaviour:
   - {fileID: 1594462257}
   - {fileID: 748566980}
   - {fileID: 1128058244}
+  submitSection: {fileID: 410643453}
+  inputName: {fileID: 80089780}
 --- !u!1 &1855814192
 GameObject:
   m_ObjectHideFlags: 0
