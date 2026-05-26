@@ -607,7 +607,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &410643454
 RectTransform:
   m_ObjectHideFlags: 0
@@ -3435,6 +3435,8 @@ MonoBehaviour:
   - {fileID: 1128058244}
   submitSection: {fileID: 410643453}
   inputName: {fileID: 80089780}
+  playerTime: 0
+  raw: 
 --- !u!1 &1594462255
 GameObject:
   m_ObjectHideFlags: 0
@@ -3860,6 +3862,8 @@ MonoBehaviour:
   - {fileID: 1128058244}
   submitSection: {fileID: 410643453}
   inputName: {fileID: 80089780}
+  playerTime: 0
+  raw: 
 --- !u!1 &1855814192
 GameObject:
   m_ObjectHideFlags: 0

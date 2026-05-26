@@ -38,24 +38,47 @@ public class LeaderboardMenu : MonoBehaviour {
     public GameObject submitSection;
     public TextMeshProUGUI inputName;
 
-    float playerTime;
+    public float playerTime;
     int lowestQualifyingSeconds;
+    int lowestTenthSeconds;
+    int totalEntries;
+    bool hasSubmitted;
     public string raw;
 
     void Start() {
         playerTime = PlayerPrefs.GetFloat("LastTime", -1f);
+        
+
         if (submitSection != null) submitSection.SetActive(false);
         StartCoroutine(DownloadScores());
     }
 
     public void SubmitScore() {
+        if (hasSubmitted) return;
+
+        playerTime = PlayerPrefs.GetFloat("LastTime", -1f);
+        Debug.Log("<color=blue>"+playerTime+"</color>");
+
+        if (playerTime < 0f) return;
+
+        int seconds = Mathf.RoundToInt(playerTime);
+
+        if (totalEntries >= 10 && seconds > lowestTenthSeconds) {
+            Debug.Log("[Leaderboard] Time " + seconds + "s is not in top 10 — not submitting");
+            return;
+        }
+
+        hasSubmitted = true;
+
         string name = inputName != null ? inputName.text : "Player";
         if (string.IsNullOrWhiteSpace(name)) name = "Player";
-        int seconds = Mathf.RoundToInt(playerTime);
         StartCoroutine(UploadTime(name, seconds));
+
+        if (submitSection != null) submitSection.SetActive(false);
     }
 
     IEnumerator UploadTime(string name, int timeSeconds) {
+        
         string url = $"{proxy}{webURL}{privateKey}/add/{name}/{timeSeconds}";
         Debug.Log("[Leaderboard] Uploading time to: " + url);
         UnityWebRequest www = UnityWebRequest.Get(url);
@@ -75,7 +98,7 @@ public class LeaderboardMenu : MonoBehaviour {
     }
 
     IEnumerator DownloadScores() {
-        string url = $"{proxy}{webURL}{privateKey}/json/5";
+        string url = $"{proxy}{webURL}{privateKey}/json/10/asc";
         Debug.Log("[Leaderboard] Downloading from: " + url);
         UnityWebRequest www = UnityWebRequest.Get(url);
         yield return www.SendWebRequest();
@@ -88,7 +111,7 @@ public class LeaderboardMenu : MonoBehaviour {
         } else {
             Debug.LogError("[Leaderboard] Download error (" + www.result + "): " + www.error);
 
-            string fallbackUrl = $"{webURL}{privateKey}/json/5/asc";
+            string fallbackUrl = $"{webURL}{privateKey}/json/10/asc";
             Debug.Log("[Leaderboard] Trying direct (no proxy): " + fallbackUrl);
             UnityWebRequest fallback = UnityWebRequest.Get(fallbackUrl);
             yield return fallback.SendWebRequest();
@@ -123,7 +146,10 @@ public class LeaderboardMenu : MonoBehaviour {
                 return;
             }
 
-            int displayCount = Mathf.Min(entries.Length, names.Count);
+            System.Array.Sort(entries, (a, b) => int.Parse(a.score).CompareTo(int.Parse(b.score)));
+
+            totalEntries = entries.Length;
+            int displayCount = Mathf.Min(totalEntries, names.Count);
 
             for (int i = 0; i < displayCount; i++) {
                 int totalSec = int.Parse(entries[i].score);
@@ -143,7 +169,12 @@ public class LeaderboardMenu : MonoBehaviour {
             else if (entries.Length > 0)
                 lowestQualifyingSeconds = int.Parse(entries[entries.Length - 1].score);
 
-            Debug.Log("[Leaderboard] Qualifying threshold: " + lowestQualifyingSeconds + "s");
+            if (entries.Length >= 10)
+                lowestTenthSeconds = int.Parse(entries[9].score);
+            else if (entries.Length > 0)
+                lowestTenthSeconds = int.Parse(entries[entries.Length - 1].score);
+
+            Debug.Log("[Leaderboard] Top-5 threshold: " + lowestQualifyingSeconds + "s | Top-10 threshold: " + lowestTenthSeconds + "s");
             CheckQualification();
         } catch (System.Exception e) {
             Debug.LogError("[Leaderboard] Parse error: " + e.Message + "\nJSON: " + json);
@@ -152,6 +183,13 @@ public class LeaderboardMenu : MonoBehaviour {
 
     void CheckQualification() {
         if (playerTime < 0f || submitSection == null) return;
+
+        if (PlayerPrefs.GetInt("GameJustWon", 0) != 1) {
+            submitSection.SetActive(false);
+            return;
+        }
+        PlayerPrefs.DeleteKey("GameJustWon");
+        PlayerPrefs.Save();
 
         int playerSeconds = Mathf.RoundToInt(playerTime);
         bool qualifies = lowestQualifyingSeconds <= 0 || playerSeconds <= lowestQualifyingSeconds;

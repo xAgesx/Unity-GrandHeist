@@ -15,7 +15,7 @@ EditorBuildSettings:
     path: Assets/Game.unity
     guid: 00714072892c66f499c893430eee8566
   - enabled: 1
-    path: Assets/Scenes/LeaderboardMenu.unity
+    path: Assets/LeaderboardMenu.unity
     guid: fdf9e8bb0318a4f4aa277e10eb8adc5d
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
