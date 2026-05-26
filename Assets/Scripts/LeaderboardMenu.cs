@@ -182,7 +182,8 @@ public class LeaderboardMenu : MonoBehaviour {
     }
 
     void CheckQualification() {
-        if (playerTime < 0f || submitSection == null) return;
+        playerTime = PlayerPrefs.GetFloat("LastTime", -1f);
+        if (playerTime <= 0f || submitSection == null) return;
 
         if (PlayerPrefs.GetInt("GameJustWon", 0) != 1) {
             submitSection.SetActive(false);
@@ -192,7 +193,7 @@ public class LeaderboardMenu : MonoBehaviour {
         PlayerPrefs.Save();
 
         int playerSeconds = Mathf.RoundToInt(playerTime);
-        bool qualifies = lowestQualifyingSeconds <= 0 || playerSeconds <= lowestQualifyingSeconds;
+        bool qualifies = totalEntries < 5 || playerSeconds <= lowestQualifyingSeconds;
         submitSection.SetActive(qualifies);
     }
 }
