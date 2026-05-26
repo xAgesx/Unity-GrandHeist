@@ -160,7 +160,7 @@ public class LeaderboardMenu : MonoBehaviour {
                 string displayTime = string.Format("{0:00}:{1:00}", min, sec);
                 Debug.Log("[Leaderboard] Entry " + i + ": " + displayName + " - " + displayTime);
 
-                names[i].text = $"{i + 1}. {displayName}";
+                names[i].text = $"{displayName}";
                 scores[i].text = displayTime;
             }
 
