@@ -8,5 +8,6 @@ public class PlayerPlaceHolder : MonoBehaviour {
     // Update is called once per frame
     void Update() {
         transform.position = target.transform.position + offset;
+        transform.LookAt(Camera.main.transform);
     }
 }

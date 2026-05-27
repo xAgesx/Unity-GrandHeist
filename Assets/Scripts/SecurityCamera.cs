@@ -80,9 +80,9 @@ public class SecurityCamera : MonoBehaviour {
         if (dist > childSpotlight.range) {
             return false;
         }
-
+        //PS :Change the Value ( .35f) to play around with the precision of the light cone
         float angle = Vector3.Angle(transform.forward, toTarget);
-        if (angle > (childSpotlight.spotAngle * 0.5f)) {
+        if (angle > (childSpotlight.spotAngle * 0.35f)) {
             return false;
         }
 
@@ -155,4 +155,94 @@ public class SecurityCamera : MonoBehaviour {
             cameraRenderer.materials[emissionMaterialIndex].SetColor(EmissionColor, targetColor);
         }
     }
+    public void OnDrawGizmos() {
+    if (childSpotlight == null) return;
+    float range = childSpotlight.range;
+    float spotAngle = childSpotlight.spotAngle;
+    float halfAngle = spotAngle * 0.5f * Mathf.Deg2Rad;
+    float radius = range * Mathf.Tan(halfAngle);
+    Gizmos.color = Color.Lerp(colorIdle, colorAlert, detectionMeter / Mathf.Max(timeToLose, 0.001f));
+    DrawConeWireframe(range, radius);
+    DrawSweepBounds(range);
+}
+void DrawConeWireframe(float range, float radius) {
+    Vector3 origin = transform.position;
+    Vector3 forward = transform.forward;
+    Vector3 up = transform.up;
+    Vector3 right = transform.right;
+    // Far ring center
+    Vector3 farCenter = origin + forward * range;
+    // 4 edge lines (top, bottom, left, right)
+    Vector3 top = farCenter + up * radius;
+    Vector3 bottom = farCenter - up * radius;
+    Vector3 left = farCenter - right * radius;
+    Vector3 rightPt = farCenter + right * radius;
+    Gizmos.DrawLine(origin, top);
+    Gizmos.DrawLine(origin, bottom);
+    Gizmos.DrawLine(origin, left);
+    Gizmos.DrawLine(origin, rightPt);
+    // Far ring (16 segments)
+    DrawCircle(farCenter, forward, up, right, radius, 16);
+    // Intermediate rings at 1/3 and 2/3
+    DrawCircle(origin + forward * (range * 0.33f), forward, up, right, radius * 0.33f, 12);
+    DrawCircle(origin + forward * (range * 0.66f), forward, up, right, radius * 0.66f, 12);
+}
+void DrawCircle(Vector3 center, Vector3 forward, Vector3 up, Vector3 right, float radius, int segments) {
+    float step = 360f / segments;
+    Vector3 prev = center + up * radius;
+    for (int i = 1; i <= segments; i++) {
+        float a = i * step * Mathf.Deg2Rad;
+        Vector3 dir = (up * Mathf.Cos(a) + right * Mathf.Sin(a)).normalized;
+        Vector3 next = center + dir * radius;
+        Gizmos.DrawLine(prev, next);
+        prev = next;
+    }
+}
+void DrawSweepBounds(float range) {
+    if (sweepAngle < 0.01f) return;
+    float halfSweep = sweepAngle * 0.5f;
+    Vector3 origin = transform.position;
+    Vector3 baseDir = transform.forward;
+    Vector3 axisVec = sweepAxis == Axis.X ? Vector3.right
+                   : sweepAxis == Axis.Y ? Vector3.up
+                   : Vector3.forward;
+    Color sweepColor = Gizmos.color;
+    sweepColor.a *= 0.4f;
+    Gizmos.color = sweepColor;
+    for (int side = -1; side <= 1; side += 2) {
+        float angle = side * halfSweep;
+        Quaternion rot = Quaternion.AngleAxis(angle, axisVec);
+        Vector3 dir = rot * baseDir;
+        Gizmos.DrawLine(origin, origin + dir * range);
+    }
+}
+void OnDrawGizmosSelected() {
+    if (player == null || childSpotlight == null) return;
+    Vector3 origin = transform.position + transform.forward * raycastStartOffset;
+    Vector3[] points = new Vector3[] {
+        player.position,
+        player.position + Vector3.up * 0.9f,
+        player.position + Vector3.up * 1.8f
+    };
+    foreach (Vector3 point in points) {
+        Vector3 toTarget = point - transform.position;
+        bool inRange = toTarget.magnitude <= childSpotlight.range;
+        bool inAngle = Vector3.Angle(transform.forward, toTarget) <= childSpotlight.spotAngle * 0.5f;
+        bool blocked = Physics.Linecast(origin, point, obstacleLayers, QueryTriggerInteraction.Ignore);
+        if (!inRange || !inAngle) {
+            Gizmos.color = Color.yellow;
+        } else if (blocked) {
+            Gizmos.color = Color.red;
+        } else {
+            Gizmos.color = Color.green;
+        }
+        Gizmos.DrawLine(origin, point);
+        Gizmos.DrawSphere(point, 0.1f);
+    }
+    if (detectionMeter > 0) {
+        float t = detectionMeter / Mathf.Max(timeToLose, 0.001f);
+        Gizmos.color = Color.Lerp(Color.yellow, Color.red, t);
+        Gizmos.DrawWireSphere(player.position + Vector3.up * 1.0f, 0.3f + t * 0.2f);
+    }
+}
 }
