@@ -1,11 +1,13 @@
 using System;
 using System.Collections.Generic;
+using System.Linq.Expressions;
 using TMPro;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.UI;
 
 public class UIManager : MonoBehaviour {
-    public static UIManager Instance { get;  set; }
+    public static UIManager Instance { get; set; }
 
     [Header("HUD")]
     public Text statusText;
@@ -40,6 +42,12 @@ public class UIManager : MonoBehaviour {
     public Image staminaFillImage;
     public Sprite staminaFillImageExhausted;
     public Sprite staminaFillImageDefault;
+    [Header("Pause")]
+    [Header("Settings")]
+    public GameObject onImage;
+    public GameObject offImage;
+    public GameObject musicOnImage;
+    public GameObject musicOffImage;
 
     void Awake() {
         if (Instance == null) Instance = this;
@@ -56,8 +64,7 @@ public class UIManager : MonoBehaviour {
             CreateTimerText();
     }
 
-    void CreateTimerText()
-    {
+    void CreateTimerText() {
         Canvas canvas = GetComponentInParent<Canvas>();
         if (canvas == null)
             canvas = FindObjectOfType<Canvas>();
@@ -98,7 +105,7 @@ public class UIManager : MonoBehaviour {
         iconRed.color = hasRed ? activeColor : inactiveColor;
     }
     public void UpdateDetectionUI(float currentTimer, float maxTimer) {
-        
+
         if (currentTimer > 0) {
             detectionCanvasGroup.alpha = 1f;
             detectionCircle.fillAmount = 1f - (currentTimer / maxTimer);
@@ -124,8 +131,7 @@ public class UIManager : MonoBehaviour {
         }
     }
 
-    public void UpdateTimerDisplay(float elapsedSeconds)
-    {
+    public void UpdateTimerDisplay(float elapsedSeconds) {
         if (timerText == null) return;
         int minutes = Mathf.FloorToInt(elapsedSeconds / 60f);
         int seconds = Mathf.FloorToInt(elapsedSeconds % 60f);
@@ -141,10 +147,25 @@ public class UIManager : MonoBehaviour {
     public void UpdateStaminaUI(float currentStamina, float maxStamina) {
         if (staminaSlider != null) {
             staminaSlider.value = currentStamina / maxStamina;
-            
-            staminaFillImage.sprite = (currentStamina < 10)?staminaFillImageExhausted : staminaFillImageDefault;
-            
-            
+
+            staminaFillImage.sprite = (currentStamina < 10) ? staminaFillImageExhausted : staminaFillImageDefault;
+
+
         }
+    }
+
+    public void ToggleSetActive(int index) {
+        switch (index) {
+            case 1:
+                onImage.SetActive(!onImage.active);
+                offImage.SetActive(!offImage.active);
+                break;
+                
+            case 2:
+                musicOnImage.SetActive(!musicOnImage.active);
+                musicOffImage.SetActive(!musicOffImage.active);
+                break;
+        }
+
     }
 }
