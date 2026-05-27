@@ -28,7 +28,12 @@ public class GuardBrain : MonoBehaviour {
 
     [Header("Movement")]
     public float patrolSpeed = 2.5f;
-    public float chaseSpeed = 6.5f;
+    public float chaseSpeed = 8.5f;
+    public float angularSpeed = 480f;
+    public float acceleration = 12f;
+
+    [Header("Close Range")]
+    public float closeRange = 3f;
 
     [Header("Catch")]
     public float catchTime = 1f;
@@ -79,6 +84,9 @@ public class GuardBrain : MonoBehaviour {
         agent = GetComponent<NavMeshAgent>();
         var p = GameObject.FindWithTag("Player");
         if (p != null) { player = p.transform; playerCtrl = p.GetComponent<PlayerController>(); }
+
+        agent.angularSpeed = angularSpeed;
+        agent.acceleration = acceleration;
 
         bt = new Selector(
             new Sequence(new Condition(() => currentState == GuardState.Chase), new ActionNode(TickChase)),
@@ -177,6 +185,13 @@ public class GuardBrain : MonoBehaviour {
         float maxDist = sightDistance * (crouch ? crouchSightMod : 1f);
 
         if (dist > maxDist) return false;
+
+        // Close-range auto-detect: standing player within closeRange is spotted regardless of angle
+        if (dist <= closeRange && !crouch) {
+            Vector3 o = transform.position + Vector3.up * 1.5f;
+            Vector3 t = player.position + Vector3.up * 1.2f;
+            return !Physics.Linecast(o, t, obstacleLayers, QueryTriggerInteraction.Ignore);
+        }
 
         Vector3 fwdFlat = new Vector3(transform.forward.x, 0f, transform.forward.z);
         bool inAngle = Vector3.Angle(fwdFlat, toPlayerFlat) <= sightAngle * 0.5f;
@@ -378,5 +393,8 @@ public class GuardBrain : MonoBehaviour {
         Gizmos.DrawLine(o, o + Quaternion.Euler(0, h, 0) * transform.forward * sightDistance);
         Gizmos.DrawLine(o, o + Quaternion.Euler(0, -h, 0) * transform.forward * sightDistance);
         Gizmos.DrawLine(o, o + transform.forward * sightDistance);
+
+        Gizmos.color = new Color(1f, 0.6f, 0f, 0.3f);
+        Gizmos.DrawSphere(o, closeRange);
     }
 }

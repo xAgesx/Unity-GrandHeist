@@ -98,7 +98,7 @@ public class LeaderboardMenu : MonoBehaviour {
     }
 
     IEnumerator DownloadScores() {
-        string url = $"{proxy}{webURL}{privateKey}/json/10/asc";
+        string url = $"{proxy}{webURL}{privateKey}/json/10";
         Debug.Log("[Leaderboard] Downloading from: " + url);
         UnityWebRequest www = UnityWebRequest.Get(url);
         yield return www.SendWebRequest();
@@ -111,7 +111,7 @@ public class LeaderboardMenu : MonoBehaviour {
         } else {
             Debug.LogError("[Leaderboard] Download error (" + www.result + "): " + www.error);
 
-            string fallbackUrl = $"{webURL}{privateKey}/json/10/asc";
+            string fallbackUrl = $"{webURL}{privateKey}/json/10";
             Debug.Log("[Leaderboard] Trying direct (no proxy): " + fallbackUrl);
             UnityWebRequest fallback = UnityWebRequest.Get(fallbackUrl);
             yield return fallback.SendWebRequest();
