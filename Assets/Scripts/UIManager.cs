@@ -1,8 +1,5 @@
-using System;
-using System.Collections.Generic;
-using System.Linq.Expressions;
 using TMPro;
-using Unity.VisualScripting;
+using UnityEditor.ShaderGraph;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +14,7 @@ public class UIManager : MonoBehaviour {
     [Header("Timer")]
     public TextMeshProUGUI timerText;
 
-    public List<Outline> outlines;
+    public System.Collections.Generic.List<Outline> outlines;
     public int currentOutlineIndex;
 
     [Header("Keycards Visuals")]
@@ -48,6 +45,11 @@ public class UIManager : MonoBehaviour {
     public GameObject offImage;
     public GameObject musicOnImage;
     public GameObject musicOffImage;
+
+    [Header("Performance")]
+    public GameObject[] performanceIcons;
+    public TextMeshProUGUI[] performanceText;
+    public Color defaultColor;
 
     void Awake() {
         if (Instance == null) Instance = this;
@@ -160,12 +162,29 @@ public class UIManager : MonoBehaviour {
                 onImage.SetActive(!onImage.active);
                 offImage.SetActive(!offImage.active);
                 break;
-                
+
             case 2:
                 musicOnImage.SetActive(!musicOnImage.active);
                 musicOffImage.SetActive(!musicOffImage.active);
                 break;
         }
+    }
 
+    public void SetPerformanceState(int index) {
+        if (performanceIcons == null || index < 0 || index >= performanceIcons.Length)
+            return;
+
+        for (int i = 0; i < performanceIcons.Length; i++) {
+            if (performanceIcons[i] != null) {
+                performanceIcons[i].SetActive(i == index);
+                performanceText[i].color = (i == index)?Color.white:defaultColor;
+
+            }
+        }
+
+        if (PerformanceManager.Instance != null) {
+            PerformanceManager.PerformanceMode mode = (PerformanceManager.PerformanceMode)index;
+            PerformanceManager.Instance.SetMode(mode);
+        }
     }
 }

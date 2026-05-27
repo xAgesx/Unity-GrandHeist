@@ -126,7 +126,7 @@ public class PerformanceManager : MonoBehaviour
         QualitySettings.shadowResolution = ShadowResolution.Low;
 
         DisableLightShadows();
-        
+        // SetVolumeActive(false);
     }
 
     void DisableLightShadows()
