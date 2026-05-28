@@ -1,6 +1,6 @@
 # Grand Heist
-
-https://github.com/user-attachments/assets/f7f159e5-f45a-4027-8540-27045b155c14
+## WATCH HERE ( click the image )
+[![Watch the video](https://img.youtube.com/vi/k_dNe8nFu4g/maxresdefault.jpg)](https://youtu.be/k_dNe8nFu4g)
 
 *A stealth heist game built in Unity.*
 
