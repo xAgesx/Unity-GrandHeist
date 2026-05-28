@@ -41,11 +41,31 @@ public class PlayerController : MonoBehaviour {
 
     public List<GameObject> interactablesInRange = new List<GameObject>();
 
+    bool cutsceneMode;
+    GameObject playerModel;
+
+    public void SetCutsceneMode(bool active)
+    {
+        cutsceneMode = active;
+    }
+
+    public void SetCutsceneAnim(float speed, bool crouch)
+    {
+        if (anim == null) return;
+        if (speed > 0.5f) state = MoveState.Run;
+        else if (speed > 0.01f) state = MoveState.Walk;
+        else state = MoveState.Idle;
+        anim.SetFloat("Speed", speed);
+        anim.SetBool("IsCrouching", crouch);
+    }
+
     void Awake() {
         cc = GetComponent<CharacterController>();
         anim = GetComponent<Animator>();
         anim.applyRootMotion = false;
         cam = Camera.main.transform;
+        if (transform.childCount > 0)
+            playerModel = transform.GetChild(0).gameObject;
         currentStamina = maxStamina;
         state = MoveState.Idle;
         anim.applyRootMotion = false;
@@ -53,6 +73,7 @@ public class PlayerController : MonoBehaviour {
 
     void Update() {
         HandleInteraction();
+        if (cutsceneMode) return;
         HandleMovement();
         SmoothCrouch();
         UpdateUI();
@@ -130,6 +151,7 @@ public class PlayerController : MonoBehaviour {
     }
 
     void HandleMovement() {
+        if (cutsceneMode || !cc.enabled) return;
 
         enableRun = (prevStamina > currentStamina || currentStamina > 10);
 

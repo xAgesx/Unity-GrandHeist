@@ -34,6 +34,23 @@ public class CameraController : MonoBehaviour
 
     PlayerController _playerCtrl;
 
+    bool _cutsceneActive;
+    Vector3 _cutscenePos;
+    Quaternion _cutsceneRot;
+
+    public void SetCutsceneActive(bool active)
+    {
+        _cutsceneActive = active;
+    }
+
+    public void SetCutsceneTransform(Vector3 pos, Quaternion rot)
+    {
+        _cutscenePos = pos;
+        _cutsceneRot = rot;
+        transform.position = pos;
+        transform.rotation = rot;
+    }
+
     void Awake()
     {
         if (target == null)
@@ -55,6 +72,13 @@ public class CameraController : MonoBehaviour
     void LateUpdate()
     {
         if (target == null) return;
+
+        if (_cutsceneActive)
+        {
+            transform.position = Vector3.Lerp(transform.position, _cutscenePos, positionSmoothing * Time.deltaTime);
+            transform.rotation = Quaternion.Slerp(transform.rotation, _cutsceneRot, rotationSmoothing * Time.deltaTime);
+            return;
+        }
 
         HandleInput();
         CalculatePosition();

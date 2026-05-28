@@ -1,5 +1,4 @@
 using TMPro;
-using UnityEditor.ShaderGraph;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -51,6 +50,13 @@ public class UIManager : MonoBehaviour {
     public TextMeshProUGUI[] performanceText;
     public Color defaultColor;
 
+    [Header("Cutscene")]
+    public GameObject hudGroup;
+    public Image letterboxTop;
+    public Image letterboxBottom;
+    public TextMeshProUGUI cutsceneText;
+    public Image alarmFlash;
+
     void Awake() {
         if (Instance == null) Instance = this;
         else Destroy(gameObject);
@@ -64,6 +70,15 @@ public class UIManager : MonoBehaviour {
 
         if (timerText == null)
             CreateTimerText();
+
+        if (cutsceneText != null)
+            cutsceneText.gameObject.SetActive(false);
+        if (letterboxTop != null)
+            letterboxTop.gameObject.SetActive(false);
+        if (letterboxBottom != null)
+            letterboxBottom.gameObject.SetActive(false);
+        if (alarmFlash != null)
+            alarmFlash.gameObject.SetActive(false);
     }
 
     void CreateTimerText() {
@@ -167,6 +182,61 @@ public class UIManager : MonoBehaviour {
                 musicOnImage.SetActive(!musicOnImage.active);
                 musicOffImage.SetActive(!musicOffImage.active);
                 break;
+        }
+    }
+
+    public void ShowLetterbox(bool show)
+    {
+        if (letterboxTop != null) letterboxTop.gameObject.SetActive(show);
+        if (letterboxBottom != null) letterboxBottom.gameObject.SetActive(show);
+    }
+
+    public void HideHUD(bool hide)
+    {
+        if (hudGroup != null) hudGroup.SetActive(!hide);
+    }
+
+    public void ShowCutsceneText(bool show)
+    {
+        if (cutsceneText != null) cutsceneText.gameObject.SetActive(show);
+    }
+
+    public void SetCutsceneText(string text)
+    {
+        if (cutsceneText != null) cutsceneText.text = text;
+    }
+
+    public void SetCutsceneTextAlpha(float alpha)
+    {
+        if (cutsceneText != null)
+        {
+            Color c = cutsceneText.color;
+            c.a = Mathf.Clamp01(alpha);
+            cutsceneText.color = c;
+        }
+    }
+
+    public void HideCutsceneText()
+    {
+        if (cutsceneText != null)
+        {
+            cutsceneText.gameObject.SetActive(false);
+            cutsceneText.text = "";
+        }
+    }
+
+    public void SetAlarmFlash(bool active)
+    {
+        if (alarmFlash != null) alarmFlash.gameObject.SetActive(active);
+    }
+
+    public void SetAlarmFlashAlpha(float alpha)
+    {
+        if (alarmFlash != null)
+        {
+            Color c = alarmFlash.color;
+            c.a = Mathf.Clamp01(alpha);
+            alarmFlash.color = c;
         }
     }
 
