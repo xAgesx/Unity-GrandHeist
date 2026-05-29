@@ -45,4 +45,5 @@ public class VaultCutsceneSetup : MonoBehaviour
         }
         return null;
     }
+
 }

@@ -212,60 +212,8 @@ Transform:
   - {fileID: 471812765}
   - {fileID: 1055602764}
   - {fileID: 1374145179}
-  - {fileID: 3074085}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &3074084
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 3074085}
-  - component: {fileID: 3074086}
-  m_Layer: 0
-  m_Name: PlayerEnteringVault
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &3074085
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3074084}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 2840253}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!320 &3074086
-PlayableDirector:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3074084}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_PlayableAsset: {fileID: 11400000, guid: e6372e9720025a34bb5d4e44443af0d4, type: 2}
-  m_InitialState: 0
-  m_WrapMode: 2
-  m_DirectorUpdateMode: 1
-  m_InitialTime: 0
-  m_SceneBindings:
-  - key: {fileID: -8591098418028562211, guid: e6372e9720025a34bb5d4e44443af0d4, type: 2}
-    value: {fileID: 1719513191}
-  m_ExposedReferences:
-    m_References: []
 --- !u!1001 &3191124
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -50631,7 +50579,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 604eab4ac62c4164881ad3c93561a4f4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  vaultDoorTimeline: {fileID: 1374145180}
+  vaultDoorTimeline: {fileID: 0}
   camCtrl: {fileID: 0}
   player: {fileID: 1719513186}
   hudGroup: {fileID: 0}
@@ -50642,6 +50590,10 @@ MonoBehaviour:
   camLook_Interior: {x: -1.8, y: 1.61, z: 0}
   camPos_Escape: {x: -4.61, y: 2.27, z: -10.61}
   camLook_Escape: {x: 0, y: 1, z: 2}
+  playerStartOffset: {x: -2.07, y: 0, z: 1}
+  playerWalkDistance: 5
+  playerWalkDuration: 2
+  playerRunDistance: 8
   phase1_DoorOpen: 3
   phase2_LootNarrate: 4
   phase3_Alarm: 2
@@ -58100,7 +58052,7 @@ PrefabInstance:
   serializedVersion: 2
   m_Modification:
     serializedVersion: 3
-    m_TransformParent: {fileID: 2053340196}
+    m_TransformParent: {fileID: 1670528731}
     m_Modifications:
     - target: {fileID: 196966, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_TagString
@@ -58136,31 +58088,31 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 437760, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_LocalPosition.x
-      value: -10
+      value: 6.14315
       objectReference: {fileID: 0}
     - target: {fileID: 437760, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: -10.72142
       objectReference: {fileID: 0}
     - target: {fileID: 437760, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: 6.1898193
       objectReference: {fileID: 0}
     - target: {fileID: 437760, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_LocalRotation.w
-      value: 1
+      value: 0.6479831
       objectReference: {fileID: 0}
     - target: {fileID: 437760, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_LocalRotation.x
-      value: -0
+      value: -0.5173778
       objectReference: {fileID: 0}
     - target: {fileID: 437760, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_LocalRotation.y
-      value: -0
+      value: -0.07486993
       objectReference: {fileID: 0}
     - target: {fileID: 437760, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_LocalRotation.z
-      value: -0
+      value: 0.55392474
       objectReference: {fileID: 0}
     - target: {fileID: 64766614086165190, guid: 3b07c06d4f626c34896163d5fab059a3, type: 3}
       propertyPath: m_IsTrigger
@@ -68686,6 +68638,38 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 410348, guid: b7bc8a0dee26ef143946095a7b277ed5, type: 3}
   m_PrefabInstance: {fileID: 1093169241}
   m_PrefabAsset: {fileID: 0}
+--- !u!1 &1670528730
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1670528731}
+  m_Layer: 0
+  m_Name: Doors
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1670528731
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1670528730}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0.5173778, y: 0.07486993, z: -0.55392474, w: 0.6479831}
+  m_LocalPosition: {x: -0.83, y: 7, z: -2.39}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children:
+  - {fileID: 1453469057}
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!4 &1671633322 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 476350, guid: c413258f59cccc14d83ab0a327fcbc1e, type: 3}
@@ -70806,11 +70790,6 @@ CapsuleCollider:
 --- !u!4 &1719513190 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 440362, guid: 7ff387e26f5e0ca4ca737283862d87ca, type: 3}
-  m_PrefabInstance: {fileID: 1237543667}
-  m_PrefabAsset: {fileID: 0}
---- !u!95 &1719513191 stripped
-Animator:
-  m_CorrespondingSourceObject: {fileID: 9531150, guid: 7ff387e26f5e0ca4ca737283862d87ca, type: 3}
   m_PrefabInstance: {fileID: 1237543667}
   m_PrefabAsset: {fileID: 0}
 --- !u!4 &1720817387 stripped
@@ -86600,7 +86579,6 @@ Transform:
   - {fileID: 509676012}
   - {fileID: 2108835964}
   - {fileID: 1115797033}
-  - {fileID: 1453469057}
   - {fileID: 1892323802}
   - {fileID: 34835523}
   - {fileID: 481213708}
@@ -90893,6 +90871,7 @@ SceneRoots:
   - {fileID: 2053340196}
   - {fileID: 1864414522}
   - {fileID: 525553080}
+  - {fileID: 1670528731}
   - {fileID: 724024293}
   - {fileID: 920772573}
   - {fileID: 1237543667}

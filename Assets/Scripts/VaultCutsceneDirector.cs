@@ -23,6 +23,12 @@ public class VaultCutsceneDirector : MonoBehaviour
     public Vector3 camPos_Escape = new Vector3(0f, 2.5f, 8f);
     public Vector3 camLook_Escape = new Vector3(0f, 1f, 0f);
 
+    [Header("Player Walk")]
+    public Vector3 playerStartOffset = new Vector3(0f, 0f, 2.5f);
+    public float playerWalkDistance = 5f;
+    public float playerWalkDuration = 2f;
+    public float playerRunDistance = 8f;
+
     [Header("Timing")]
     public float phase1_DoorOpen = 2.5f;
     public float phase2_LootNarrate = 4f;
@@ -161,6 +167,7 @@ public class VaultCutsceneDirector : MonoBehaviour
         StartCoroutine(MoveCameraTo(exteriorPos, exteriorLook, cameraMoveDuration));
 
         vaultDoorTimeline.Play();
+        if (player != null) StartCoroutine(StartPlayerWalkAfterDelay(3f));
         if (sfxVaultOpen != null) SoundManager.Instance.PlaySFX(sfxVaultOpen);
 
         yield return new WaitForSeconds(phase1_DoorOpen);
@@ -174,6 +181,7 @@ public class VaultCutsceneDirector : MonoBehaviour
 
         yield return new WaitForSeconds(cameraMoveDuration * 0.5f);
 
+        if (player != null) player.SetCutsceneAnim(0.15f, true);
         yield return StartCoroutine(ShowNarration("You step into the vault...", 1.5f));
         if (sfxGoldClink != null) SoundManager.Instance.PlaySFX(sfxGoldClink);
         yield return StartCoroutine(ShowNarration("Gold bars... stacks of cash...\nyou fill your bag to the brim.", 2.5f));
@@ -195,21 +203,17 @@ public class VaultCutsceneDirector : MonoBehaviour
         Vector3 escapeCamLook = vaultDoorTransform.TransformPoint(camLook_Escape);
         StartCoroutine(MoveCameraTo(escapeCamPos, escapeCamLook, cameraMoveDuration));
 
+        if (player != null) StartCoroutine(RunOutOfVault(phase4_Escape));
         yield return StartCoroutine(ShowNarration("You sprint for the exit!", 1.5f));
 
         yield return new WaitForSeconds(phase4_Escape - 1.5f);
 
-        // --- End ---
+        // --- End: Redirect to Leaderboard ---
         currentPhase = Phase.Done;
-
-        SetLetterbox(false);
-        SetHUDVisible(true);
-        HideNarration();
-        SetAlarmFlashOff();
-
-        if (camCtrl != null) camCtrl.SetCutsceneActive(false);
-        if (player != null) player.SetCutsceneMode(false);
         cutscenePlaying = false;
+
+        if (GameManager.Instance != null)
+            GameManager.Instance.TriggerWin();
     }
 
     void SetLetterbox(bool show)
@@ -320,6 +324,51 @@ public class VaultCutsceneDirector : MonoBehaviour
             yield return null;
         }
         camCtrl.transform.localPosition = originalPos;
+    }
+
+    IEnumerator StartPlayerWalkAfterDelay(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+
+        CharacterController cc = player.GetComponent<CharacterController>();
+        if (cc != null) cc.enabled = false;
+
+        Vector3 startPos = vaultDoorTransform.TransformPoint(playerStartOffset);
+        player.transform.position = startPos;
+        player.transform.rotation = Quaternion.LookRotation(-vaultDoorTransform.forward);
+
+        if (cc != null) cc.enabled = true;
+
+        player.SetCutsceneAnim(0.3f, false);
+
+        float t = 0f;
+        while (t < playerWalkDuration)
+        {
+            t += Time.deltaTime;
+            float step = (playerWalkDistance / playerWalkDuration) * Time.deltaTime;
+            if (cc != null) cc.Move(player.transform.forward * step);
+            yield return null;
+        }
+
+        player.SetCutsceneAnim(0f, false);
+    }
+
+    IEnumerator RunOutOfVault(float duration)
+    {
+        CharacterController cc = player.GetComponent<CharacterController>();
+        if (cc == null) yield break;
+
+        player.transform.rotation = Quaternion.LookRotation(vaultDoorTransform.forward);
+        player.SetCutsceneAnim(1f, false);
+
+        float t = 0f;
+        while (t < duration)
+        {
+            t += Time.deltaTime;
+            float step = (playerRunDistance / duration) * Time.deltaTime;
+            cc.Move(player.transform.forward * step);
+            yield return null;
+        }
     }
 
     Transform GizmoFrame()
