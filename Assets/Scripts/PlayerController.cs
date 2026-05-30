@@ -43,6 +43,7 @@ public class PlayerController : MonoBehaviour {
 
     bool cutsceneMode;
     GameObject playerModel;
+    public bool moving;
 
     public void SetCutsceneMode(bool active)
     {
@@ -90,6 +91,7 @@ public class PlayerController : MonoBehaviour {
                     interactablesInRange.RemoveAt(0);
                     RefreshInteractionFocus();
                     UIManager.Instance.AdvanceOutline();
+                    if (MissionManager.Instance != null) MissionManager.Instance.AdvanceMission();
                 }
             } else if (target.CompareTag("Door")) {
                 LockedDoor door = target.GetComponent<LockedDoor>();
@@ -97,6 +99,7 @@ public class PlayerController : MonoBehaviour {
                     interactablesInRange.RemoveAt(0);
                     RefreshInteractionFocus();
                     UIManager.Instance.AdvanceOutline();
+                    if (MissionManager.Instance != null) MissionManager.Instance.AdvanceMission();
                 }
             }
         }
@@ -160,7 +163,7 @@ public class PlayerController : MonoBehaviour {
         bool wantRun = Input.GetKey(KeyCode.LeftShift) && canRun && enableRun;
         bool wantCrouch = Input.GetKey(KeyCode.LeftControl) | Input.GetKey(KeyCode.C);
         Vector2 input = new Vector2(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
-        bool moving = input.sqrMagnitude > 0.01f;
+        moving = input.sqrMagnitude > 0.01f;
 
         if (wantCrouch) state = MoveState.Crouch;
         else if (!moving) state = MoveState.Idle;
@@ -225,7 +228,7 @@ public class PlayerController : MonoBehaviour {
 
     void UpdateAnimator() {
         float speed = 0f;
-        if (state == MoveState.Crouch) speed = 0.15f;
+        if (state == MoveState.Crouch && moving ) speed = .15f;
         else if (state == MoveState.Walk) speed = 0.3f;
         else if (state == MoveState.Run) speed = 1f;
         anim.SetFloat("Speed", speed);

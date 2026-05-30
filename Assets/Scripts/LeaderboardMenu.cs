@@ -34,6 +34,9 @@ public class LeaderboardMenu : MonoBehaviour {
     public List<TextMeshProUGUI> names;
     public List<TextMeshProUGUI> scores;
 
+    [Header("Player Time")]
+    public TextMeshProUGUI playerTimeDisplay;
+
     [Header("Submit")]
     public GameObject submitSection;
     public TextMeshProUGUI inputName;
@@ -47,7 +50,16 @@ public class LeaderboardMenu : MonoBehaviour {
 
     void Start() {
         playerTime = PlayerPrefs.GetFloat("LastTime", -1f);
-        
+
+        if (playerTimeDisplay != null) {
+            if (playerTime > 0f) {
+                int min = Mathf.FloorToInt(playerTime / 60f);
+                int sec = Mathf.FloorToInt(playerTime % 60f);
+                playerTimeDisplay.text = $"Your Time: {min:00}:{sec:00}";
+            } else {
+                playerTimeDisplay.gameObject.SetActive(false);
+            }
+        }
 
         if (submitSection != null) submitSection.SetActive(false);
         StartCoroutine(DownloadScores());

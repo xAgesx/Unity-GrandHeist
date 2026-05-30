@@ -186,13 +186,6 @@ public class GuardBrain : MonoBehaviour {
 
         if (dist > maxDist) return false;
 
-        // Close-range auto-detect: standing player within closeRange is spotted regardless of angle
-        if (dist <= closeRange && !crouch) {
-            Vector3 o = transform.position + Vector3.up * 1.5f;
-            Vector3 t = player.position + Vector3.up * 1.2f;
-            return !Physics.Linecast(o, t, obstacleLayers, QueryTriggerInteraction.Ignore);
-        }
-
         Vector3 fwdFlat = new Vector3(transform.forward.x, 0f, transform.forward.z);
         bool inAngle = Vector3.Angle(fwdFlat, toPlayerFlat) <= sightAngle * 0.5f;
         if (!inAngle) return false;
