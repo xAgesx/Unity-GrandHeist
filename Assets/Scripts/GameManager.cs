@@ -10,6 +10,7 @@ public class GameManager : MonoBehaviour {
     public bool isGameWon;
     public GameObject overlayUI;
     public GameObject pausePanel;
+    public GameObject settingsPanel;
     public Image musicButtonImage;
     public Image soundButtonImage;
     public Sprite musicOnSprite;
@@ -75,6 +76,7 @@ public class GameManager : MonoBehaviour {
         } else {
             if (overlayUI != null) overlayUI.SetActive(true);
             if (pausePanel != null) pausePanel.SetActive(false);
+            if (settingsPanel != null) settingsPanel.SetActive(false);
             Time.timeScale = 1f;
         }
     }

@@ -2,12 +2,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Rendering;
 
-public class PerformanceManager : MonoBehaviour
-{
+public class PerformanceManager : MonoBehaviour {
     public static PerformanceManager Instance { get; private set; }
 
-    public enum PerformanceMode
-    {
+    public enum PerformanceMode {
         Default,
         OptimizedNoVisualChange,
         HighPerformance70FPS
@@ -30,12 +28,10 @@ public class PerformanceManager : MonoBehaviour
 
     List<(Light light, LightShadows shadowMode)> lightShadowStates = new List<(Light, LightShadows)>();
 
-    void Awake()
-    {
+    void Awake() {
         if (Instance == null)
             Instance = this;
-        else
-        {
+        else {
             Destroy(gameObject);
             return;
         }
@@ -53,17 +49,18 @@ public class PerformanceManager : MonoBehaviour
         defaultShadowResolution = (int)QualitySettings.shadowResolution;
     }
 
-    void Start()
-    {
+    void Start() {
         postProcessVolume = FindFirstObjectByType<Volume>();
+        if (Application.platform == RuntimePlatform.WebGLPlayer) {
+            SetMode(PerformanceMode.HighPerformance70FPS);
+            UIManager.Instance?.SetPerformanceState(2);
+        }
     }
 
-    public void SetMode(PerformanceMode mode)
-    {
+    public void SetMode(PerformanceMode mode) {
         currentMode = mode;
 
-        switch (mode)
-        {
+        switch (mode) {
             case PerformanceMode.Default:
                 ApplyDefaultMode();
                 break;
@@ -76,8 +73,7 @@ public class PerformanceManager : MonoBehaviour
         }
     }
 
-    public void ApplyDefaultMode()
-    {
+    public void ApplyDefaultMode() {
         QualitySettings.SetQualityLevel(defaultQualityLevel);
         QualitySettings.vSyncCount = defaultVSyncCount;
         Application.targetFrameRate = defaultTargetFrameRate;
@@ -92,8 +88,7 @@ public class PerformanceManager : MonoBehaviour
         SetVolumeActive(true);
     }
 
-    public void ApplyOptimizedNoVisualChange()
-    {
+    public void ApplyOptimizedNoVisualChange() {
         QualitySettings.SetQualityLevel(defaultQualityLevel);
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 60;
@@ -109,8 +104,7 @@ public class PerformanceManager : MonoBehaviour
         SetVolumeActive(true);
     }
 
-    public void ApplyHighPerformance70FPS()
-    {
+    public void ApplyHighPerformance70FPS() {
         QualitySettings.SetQualityLevel(0);
         QualitySettings.vSyncCount = 0;
         Application.targetFrameRate = 70;
@@ -129,29 +123,24 @@ public class PerformanceManager : MonoBehaviour
         // SetVolumeActive(false);
     }
 
-    void DisableLightShadows()
-    {
+    void DisableLightShadows() {
         lightShadowStates.Clear();
         Light[] lights = FindObjectsByType<Light>(FindObjectsSortMode.None);
-        foreach (Light light in lights)
-        {
+        foreach (Light light in lights) {
             lightShadowStates.Add((light, light.shadows));
             light.shadows = LightShadows.None;
         }
     }
 
-    void RestoreLightShadows()
-    {
-        foreach (var entry in lightShadowStates)
-        {
+    void RestoreLightShadows() {
+        foreach (var entry in lightShadowStates) {
             if (entry.light != null)
                 entry.light.shadows = entry.shadowMode;
         }
         lightShadowStates.Clear();
     }
 
-    void SetVolumeActive(bool active)
-    {
+    void SetVolumeActive(bool active) {
         if (postProcessVolume != null)
             postProcessVolume.enabled = active;
     }
